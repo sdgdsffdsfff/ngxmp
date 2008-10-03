@@ -1,0 +1,93 @@
+#!/bin/bash
+
+. conf
+
+PRE=$PREFIX/$FULLNAME
+
+MODULE_hash=../nginx_upstream_hash-0.2
+MODULE_empty=../ngx_http_empty_module
+MODULE_repl=../ngx_http_repl_module
+MODULE_rv=../ngx_http_rv_module
+MODULE_vwrite=../ngx_http_vwrite_module
+MODULE_rand=../ngx_http_rand_module
+MODULE_time=../ngx_http_time_module
+MODULE_list=../ngx_http_list_module
+MODULE_mcm=../ngx_http_memcached_more_module
+
+Conf_Mod="\
+  --add-module=${MODULE_hash}		\
+  --add-module=${MODULE_empty}		\
+  --add-module=${MODULE_repl}		\
+  --add-module=${MODULE_rv}		\
+  --add-module=${MODULE_vwrite}		\
+  --add-module=${MODULE_rand}		\
+  --add-module=${MODULE_time}		\
+  --add-module=${MODULE_list}		\
+  --add-module=${MODULE_mcm}		\
+"
+
+Conf_Dbg="\
+    --with-cc-opt=-O1 		\
+    --with-ld-opt=-O1 		\
+"
+
+if [ $DEBUG = 1 ]; then
+  Conf_Dbg="\
+    --with-cc-opt=-g3 		\
+    --with-ld-opt=-g3 		\
+    --with-debug		\
+"
+
+fi
+
+
+
+
+
+cd $NGINX_SRC
+
+
+# --add-module=${MODULE_mcp} \
+# --add-module=${MODULE_getmc} \
+# --without-http_memcached_module \
+# --with-ld-opt=-lstdc++ \
+# --with-ld-opt=-lmemcache \
+# --without-http_proxy_module	    \
+# --with-cc-opt=-g 			 \
+./configure					\
+	$Conf_Mod $Conf_Dbg			\
+	--prefix=$PRE				\
+	--without-http_access_module		\
+	--without-http_auth_basic_module	\
+	--without-http_autoindex_module		\
+	--without-http_browser_module		\
+	--without-http_charset_module		\
+	--without-http_empty_gif_module		\
+	--without-http_fastcgi_module		\
+	--without-http_geo_module		\
+	--without-http_gzip_module		\
+	--without-http_limit_zone_module	\
+	--without-http_map_module		\
+	--without-http_referer_module		\
+	--without-http_upstream_ip_hash_module	\
+	--without-http_userid_module		\
+        --without-http_memcached_module		\
+	--without-mail_imap_module		\
+	--without-mail_pop3_module		\
+	--without-mail_smtp_module		\
+	--without-poll_module			\
+	--without-select_module			\
+	--sbin-path=sbin/$FULLNAME
+
+make install
+
+
+# link
+rm $PRE/conf/nginx.conf -rf
+ln -s $PWD/conf/nginx.conf $PRE/conf/nginx.conf
+
+rm $PRE/html -rf
+ln -s $PWD/html $PRE/html
+
+cd -
+

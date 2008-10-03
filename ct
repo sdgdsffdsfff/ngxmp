@@ -1,0 +1,116 @@
+#!/bin/bash
+
+
+# I'm a server control script
+
+. conf
+
+Kill()
+{ #{{{
+
+  PID=`cat $PREFIX/$FULLNAME/logs/nginx.pid`
+  # PID=`ps -ef | grep $FULLNAME | fgrep -v grep | grep master | awk '{print $2}'`
+  kill -SIGQUIT $PID
+} #}}}
+
+Debug()
+{ #{{{
+  # start debug at 1 worder
+
+  MPID=`ps -ef | grep $FULLNAME | fgrep -v grep | grep master | awk '{print $2}'`
+  WPID=`ps -ef | grep $MPID | fgrep -v grep | grep worker | head -n1 | awk '{print $2}'`
+  echo to debug : $WPID
+  gdb program $WPID -x gdb.cmd
+} #}}}
+
+Strace()
+{ #{{{
+  while [ 1 ]; do
+    MPID=`ps -ef | grep $FULLNAME | fgrep -v grep | grep master | awk '{print $2}'`
+    WPID=`ps -ef | grep $MPID | fgrep -v grep | grep worker | awk '{print $2}'`
+    echo $WPID
+    # strace -v -e trace=writev -e write=6 -p $WPID
+    strace -v -p $WPID
+    echo "\n\n\n\n\n"
+  done
+} #}}}
+
+StraceDown()
+{ #{{{
+  SHELLPID=`ps -ef | grep strace | fgrep -v grep | awk '{print $3}'`
+  STPID=`ps -ef | grep strace | fgrep -v grep | awk '{print $2}'`
+  kill $SHELLPID
+  kill $STPID
+} #}}}
+
+GenerateConf()
+{ #{{{
+  CD=$PWD/conf.src/debug
+
+
+  if [ $DEBUG = 1 ]; then
+    echo debug mode
+  else
+    CD=$PWD/conf.src/release
+  fi
+
+
+  cat \
+  conf.src/head.nginx.conf \
+  $CD/global.nginx.conf \
+  conf.src/http.nginx.conf \
+  > $CONF_DIR/nginx.conf
+
+} #}}}
+
+
+Start="$PREFIX/$FULLNAME/sbin/$FULLNAME"
+
+case $1 in 
+  "mk")
+  make
+  ;;
+
+  "up")
+  make
+  GenerateConf
+  > $PREFIX/$FULLNAME/logs/error.log
+  `$Start`
+  ;;
+
+  "down")
+  Kill
+  ;;
+
+  "pack")
+  echo nothing done
+  ;;
+
+  "rest") 
+  make
+  ps -ef | grep $FULLNAME | fgrep -v grep | grep master
+  Kill
+  # > $PREFIX/$FULLNAME/logs/error.log
+  GenerateConf
+  `$Start`
+  ps -ef | grep $FULLNAME | fgrep -v grep | grep master
+  ;;
+
+  "gdb")
+  Debug
+  ;;
+
+  "st")
+  Strace
+  ;;
+
+  "stdown")
+  StraceDown
+  ;;
+
+  *)
+  echo .....
+  ;;
+esac
+
+

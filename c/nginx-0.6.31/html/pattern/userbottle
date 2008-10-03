@@ -1,0 +1,1 @@
+<!--# echo var="ssipre" default="" -->{"send":"<!--# include virtual="/key?${uid}_send" -->", "reply":"<!--# include virtual="/key?${uid}_reply" -->"}<!--# echo var="ssisuf" default="" -->

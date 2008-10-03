@@ -1,0 +1,143 @@
+
+                              ********************
+                              NGinx Memcache Proxy
+                              ******************** suite
+
+                                                                   version : 0.1
+                                                                           by xp 
+                                                         yanbo@staff.sina.com.cn
+                                                               drdr.xp@gmail.com
+
+This is an easy to use and configurable http to mc-protocal proxy utilizing SSI
+module & modified memcached module.
+
+And a bundle of other modules do most boring works. With the modules(in the
+  root of install path) you need barely to write any c code.
+
+The core modules SSI and memcached, which are responsible of composing response
+template and sending request to backends memcache respectively.
+
+Some additional module requires for further usages: upstream module for load
+balancing and request hashing, rewrite module for uri parsing.
+
+List of 3rd party module:
+
+    empty : output empty response. A black hole where you can rewrite some bad
+            request to.
+
+    list  : operate string LIKE a list(or array).
+
+    rand  : generate a random number.
+    
+    repl  : replace list-like string with user-defined template.
+
+    rv    : remote variable linked to backend mc(mdb). Synchronized request.
+            This may blocks entire worker process until mc response. BE CAREFUL
+
+    time  : generate time string. 
+
+    vwrite: write  content of a variable to client as http response.
+
+Usage:
+******
+
+    Edit conf
+    ./inst
+    Edit conf.src/.*
+    ./ct up
+
+    piece of A simple nginx.conf:
+
+        upstream mc {
+          server 10.54.37.96:21239;
+        }
+
+        ....
+        ....
+
+        # /bottle?bid=*&var=*
+        location /bottle {
+          if ($query_string ~ "&var=(.*)$") {
+            set $memcached_prefix $1=;
+            set $memcached_suffix ";";
+          }
+          if ($query_string ~ "bid=(\d*)") {
+            set $bid $1;
+          }
+          rewrite ^/bottle.* /key\?db_$bid? last;
+        }
+
+        # /key?[mc_key]
+        location /key {
+          memcached_pass mc;
+          
+          set $memcached_key $query_string;
+          memcached_next_upstream off;
+          default_type text/html;
+          error_page 404 = /empty;
+        }
+
+    Then you can request : 
+        http://domain/bottle?bid=123&var=json
+
+    The response is a json string(supposed in mc the key 'db_123' is of the
+      value '{btl:"a bottle"}'):
+
+        json={blt:"a bottle"};
+        
+
+
+    A complicated example(use ssi as output template):
+
+        upstream mc {
+          server 10.54.37.96:21239;
+          server 10.54.37.96:21240;
+          server 10.54.37.96:21239;
+          hash $memcached_key; # hash with the requested key
+        }
+
+        ....
+        ....
+
+        # /userbottle?uid=*&var=*
+        location /userbottle {
+          if ($query_string ~ "&var=(.*)$") {
+            set $ssipre $1=;
+            set $ssisuf ";";
+          }
+          if ($query_string ~ "uid=(\d*)") {
+            set $uid $1;
+          }
+          rewrite ^/userbottle /pattern/userbottle last;
+        }
+
+        # /key?[mc_key]
+        location /key {
+          memcached_pass mc;
+          
+          set $memcached_key $query_string;
+          memcached_next_upstream off;
+          default_type text/html;
+          error_page 404 = /empty;
+        }
+
+    In nginx-0.6*/html.. you have :
+        html/
+        |~pattern/
+        | |-userbottle
+
+        The content of userbottle :
+            <!--# echo var="ssipre" default="" -->
+            {
+              "send":"<!--# include virtual="/key?${uid}_send" -->",
+              "reply":"<!--# include virtual="/key?${uid}_reply" -->"
+            }
+            <!--# echo var="ssisuf" default="" -->
+
+    When you request :
+        http://domain/userbottle?uid=123&var=json
+
+    You got:
+        json={"send":"value of key '123_send'", 
+              "reply":"value of key '123_reply'" };
+        

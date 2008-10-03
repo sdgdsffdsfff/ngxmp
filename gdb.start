@@ -1,0 +1,3 @@
+file /data1/ngmp.nginx/sbin/ngmp.nginx
+set follow-fork-mode child
+run

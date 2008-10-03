@@ -1,0 +1,16 @@
+diff -Naur ../nginx-0.5.21/src/http/ngx_http_upstream.h src/http/ngx_http_upstream.h
+--- ../nginx-0.5.21/src/http/ngx_http_upstream.h	2007-04-18 13:23:19.000000000 -0700
++++ src/http/ngx_http_upstream.h	2007-05-28 14:14:58.000000000 -0700
+@@ -89,6 +89,12 @@
+ 
+     ngx_array_t                    *servers;   /* ngx_http_upstream_server_t */
+ 
++    ngx_array_t                    *values;
++    ngx_array_t                    *lengths;
++    ngx_uint_t                      retries;
++
++    ngx_uint_t                    (*hash_function)(u_char *data, size_t len);
++
+     ngx_uint_t                      flags;
+     ngx_str_t                       host;
+     ngx_str_t                       file_name;
