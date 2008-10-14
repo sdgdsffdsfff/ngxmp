@@ -165,14 +165,14 @@ ngx_http_mcm_get_ctx(ngx_http_request_t *r)
 {
   ngx_http_mcm_ctx_t *ctx;
 
-  ctx = ngx_http_get_module_ctx(r, ngx_http_mcm_module);
+  ctx = ngx_http_get_module_ctx(r, ngx_http_memcached_more_module);
 
   if (NULL == ctx) {
 
     ctx = ngx_palloc(r->pool, sizeof(ngx_http_mcm_ctx_t));
     if (ctx == NULL) { return NULL; }
 
-    ngx_http_set_ctx(r, ctx, ngx_http_mcm_module);
+    ngx_http_set_ctx(r, ctx, ngx_http_memcached_more_module);
 
   }
 
@@ -201,7 +201,7 @@ ngx_http_mcm_handler(ngx_http_request_t *r)
     return NGX_HTTP_INTERNAL_SERVER_ERROR;
   }
 
-  mlcf = ngx_http_get_module_loc_conf(r, ngx_http_mcm_module);
+  mlcf = ngx_http_get_module_loc_conf(r, ngx_http_memcached_more_module);
 
   u = ngx_pcalloc(r->pool, sizeof(ngx_http_upstream_t));
   if (u == NULL) {
@@ -216,7 +216,7 @@ ngx_http_mcm_handler(ngx_http_request_t *r)
   u->peer.lock = &r->connection->lock;
 #endif
 
-  u->output.tag = (ngx_buf_tag_t) & ngx_http_mcm_module;
+  u->output.tag = (ngx_buf_tag_t) & ngx_http_memcached_more_module;
 
   u->conf = &mlcf->upstream;
 
@@ -238,7 +238,7 @@ ngx_http_mcm_handler(ngx_http_request_t *r)
   ctx->rest = MC_END_LEN;
   ctx->request = r;
 
-  ngx_http_set_ctx(r, ctx, ngx_http_mcm_module);
+  ngx_http_set_ctx(r, ctx, ngx_http_memcached_more_module);
 
   u->input_filter_init = ngx_http_mcm_filter_init;
   u->input_filter = ngx_http_mcm_filter;
@@ -260,7 +260,7 @@ ngx_http_mcm_create_request(ngx_http_request_t *r)
   ngx_http_variable_value_t *vv;
   ngx_http_mcm_loc_conf_t *mlcf;
 
-  mlcf = ngx_http_get_module_loc_conf(r, ngx_http_mcm_module);
+  mlcf = ngx_http_get_module_loc_conf(r, ngx_http_memcached_more_module);
 
   logd(r, mlcf->prefix_index);
 
@@ -293,7 +293,7 @@ ngx_http_mcm_create_request(ngx_http_request_t *r)
 
   *b->last++ = 'g'; *b->last++ = 'e'; *b->last++ = 't'; *b->last++ = ' ';
 
-  ctx = ngx_http_get_module_ctx(r, ngx_http_mcm_module);
+  ctx = ngx_http_get_module_ctx(r, ngx_http_memcached_more_module);
 
   ctx->key.data = b->last;
 
@@ -358,7 +358,7 @@ ngx_http_mcm_process_header(ngx_http_request_t *r)
 
   p = u->buffer.pos;
 
-  ctx = ngx_http_get_module_ctx(r, ngx_http_mcm_module);
+  ctx = ngx_http_get_module_ctx(r, ngx_http_memcached_more_module);
 
   if (ngx_strncmp(p, "VALUE ", sizeof("VALUE ") - 1) == 0) {
 
@@ -408,7 +408,7 @@ length:
     ngx_http_variable_value_t *pv;
     ngx_http_variable_value_t *sv;
 
-    lcf = ngx_http_get_module_loc_conf(r, ngx_http_mcm_module);
+    lcf = ngx_http_get_module_loc_conf(r, ngx_http_memcached_more_module);
 
     pv = ngx_http_get_flushed_variable(r, lcf->prefix_index);
     log(r, "got prefix:%v", pv);
@@ -492,7 +492,7 @@ ngx_http_mcm_filter_init(void *data)
 
   u->length += MC_END_LEN;
 
-  lcf = ngx_http_get_module_loc_conf(r, ngx_http_mcm_module);
+  lcf = ngx_http_get_module_loc_conf(r, ngx_http_memcached_more_module);
 
   logd(r, lcf->prefix_index);
 
@@ -541,7 +541,7 @@ ngx_http_mcm_add_suffix(ngx_http_mcm_ctx_t *ctx,
   ngx_http_mcm_loc_conf_t *lcf;
   ngx_http_variable_value_t *sv;
 
-  lcf = ngx_http_get_module_loc_conf(r, ngx_http_mcm_module);
+  lcf = ngx_http_get_module_loc_conf(r, ngx_http_memcached_more_module);
 
   sv = ngx_http_get_indexed_variable(r, lcf->suffix_index);
   log(r, "got suffix:%v", sv);

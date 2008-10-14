@@ -1,1 +1,1 @@
-break ngx_http_rv_set_handler
+break ngx_http_output_filter
