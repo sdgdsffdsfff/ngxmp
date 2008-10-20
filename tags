@@ -4,7 +4,11 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.7	//
+ADDON_DEPS	c/nginx-0.6.31/objs/Makefile	/^ADDON_DEPS = $(CORE_DEPS)  $(HTTP_DEPS)$/;"	m
+ALL_INCS	c/nginx-0.6.31/objs/Makefile	/^ALL_INCS = -I src\/core \\$/;"	m
 APPEND_STR	c/ngx_http_repl_module/ngx_http_repl_module.c	36;"	d	file:
+CC	c/nginx-0.6.31/objs/Makefile	/^CC =	gcc$/;"	m
+CFLAGS	c/nginx-0.6.31/objs/Makefile	/^CFLAGS =    -pipe    -W -Wall -Wpointer-arith -Wno-unused-parameter -Wno-unused-function -Wunused-variable -Wunused-value -Werror -g3$/;"	m
 CMSG_DATA	c/nginx-0.6.31/src/os/unix/ngx_freebsd_config.h	61;"	d
 CMSG_DATA	c/nginx-0.6.31/src/os/unix/ngx_freebsd_config.h	62;"	d
 CMSG_DATA	c/nginx-0.6.31/src/os/unix/ngx_posix_config.h	123;"	d
@@ -17,6 +21,9 @@ CMSG_SPACE	c/nginx-0.6.31/src/os/unix/ngx_freebsd_config.h	55;"	d
 CMSG_SPACE	c/nginx-0.6.31/src/os/unix/ngx_freebsd_config.h	56;"	d
 CMSG_SPACE	c/nginx-0.6.31/src/os/unix/ngx_posix_config.h	117;"	d
 CMSG_SPACE	c/nginx-0.6.31/src/os/unix/ngx_posix_config.h	118;"	d
+CORE_DEPS	c/nginx-0.6.31/objs/Makefile	/^CORE_DEPS = src\/core\/nginx.h \\$/;"	m
+CORE_INCS	c/nginx-0.6.31/objs/Makefile	/^CORE_INCS = -I src\/core \\$/;"	m
+CPP	c/nginx-0.6.31/objs/Makefile	/^CPP =	gcc -E$/;"	m
 CR	c/nginx-0.6.31/src/core/ngx_core.h	82;"	d
 CRLF	c/nginx-0.6.31/src/core/ngx_core.h	83;"	d
 DEBUG	c/ngx_http_vwrite_module/debug.h	48;"	d
@@ -29,7 +36,6 @@ DP_ISPOLLED	c/nginx-0.6.31/src/event/modules/ngx_devpoll_module.c	18;"	d	file:
 DP_POLL	c/nginx-0.6.31/src/event/modules/ngx_devpoll_module.c	17;"	d	file:
 Debug	ct	/^Debug()$/;"	f
 END	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	177;"	d	file:
-END	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	157;"	d	file:
 EPOLLERR	c/nginx-0.6.31/src/event/modules/ngx_epoll_module.c	24;"	d	file:
 EPOLLET	c/nginx-0.6.31/src/event/modules/ngx_epoll_module.c	27;"	d	file:
 EPOLLHUP	c/nginx-0.6.31/src/event/modules/ngx_epoll_module.c	25;"	d	file:
@@ -61,9 +67,11 @@ HTTP_BAD_GATEWAY	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^use constant HT
 HTTP_BAD_REQUEST	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^use constant HTTP_BAD_REQUEST               => 400;$/;"	c
 HTTP_CONFLICT	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^use constant HTTP_CONFLICT                  => 409;$/;"	c
 HTTP_CREATED	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^use constant HTTP_CREATED                   => 201;$/;"	c
+HTTP_DEPS	c/nginx-0.6.31/objs/Makefile	/^HTTP_DEPS = src\/http\/ngx_http.h \\$/;"	m
 HTTP_FORBIDDEN	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^use constant HTTP_FORBIDDEN                 => 403;$/;"	c
 HTTP_GATEWAY_TIME_OUT	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^use constant HTTP_GATEWAY_TIME_OUT          => 504;$/;"	c
 HTTP_GONE	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^use constant HTTP_GONE                      => 410;$/;"	c
+HTTP_INCS	c/nginx-0.6.31/objs/Makefile	/^HTTP_INCS = -I src\/http \\$/;"	m
 HTTP_INSUFFICIENT_STORAGE	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^use constant HTTP_INSUFFICIENT_STORAGE      => 507;$/;"	c
 HTTP_INTERNAL_SERVER_ERROR	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^use constant HTTP_INTERNAL_SERVER_ERROR     => 500;$/;"	c
 HTTP_LENGTH_REQUIRED	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^use constant HTTP_LENGTH_REQUIRED           => 411;$/;"	c
@@ -132,6 +140,7 @@ K_REP_PTN	c/ngx_http_repl_module/ngx_http_repl_module.c	25;"	d	file:
 K_REP_SUF	c/ngx_http_repl_module/ngx_http_repl_module.c	24;"	d	file:
 Kill	ct	/^Kill()$/;"	f
 LF	c/nginx-0.6.31/src/core/ngx_core.h	81;"	d
+LINK	c/nginx-0.6.31/objs/Makefile	/^LINK =	$(CC)$/;"	m
 LOG_FORMAT	c/ngx_http_vwrite_module/debug.h	28;"	d
 LOG_FORMAT	c/ngx_util/debug.h	26;"	d
 LOG_TO_STDERR	c/ngx_http_vwrite_module/debug.h	1;"	d
@@ -141,14 +150,10 @@ MAX_TIME_LEN	c/ngx_http_time_module/ngx_http_time_module.c	67;"	d	file:
 MCK_ALL	c/ngx_http_repl_module/ngx_http_repl_module.c	28;"	d	file:
 MCK_ALL_len	c/ngx_http_repl_module/ngx_http_repl_module.c	29;"	d	file:
 MC_END_LEN	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	179;"	d	file:
-MC_END_LEN	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	159;"	d	file:
 MC_PARSE_NO_BODY	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	46;"	d	file:
-MC_PARSE_NO_BODY	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	46;"	d	file:
 MC_PARSE_NO_HEAD	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	45;"	d	file:
-MC_PARSE_NO_HEAD	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	45;"	d	file:
 MC_SERVER_NUM	c/ngx_http_repl_module/ngx_http_repl_module.c	33;"	d	file:
 MC_VALUE_LEN	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	182;"	d	file:
-MC_VALUE_LEN	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	162;"	d	file:
 MD5Final	c/nginx-0.6.31/src/http/ngx_http_file_cache.c	21;"	d	file:
 MD5Init	c/nginx-0.6.31/src/http/ngx_http_file_cache.c	19;"	d	file:
 MD5Update	c/nginx-0.6.31/src/http/ngx_http_file_cache.c	20;"	d	file:
@@ -190,6 +195,8 @@ NGX_CMD_OPEN_CHANNEL	c/nginx-0.6.31/src/os/unix/ngx_process_cycle.h	15;"	d
 NGX_CMD_QUIT	c/nginx-0.6.31/src/os/unix/ngx_process_cycle.h	17;"	d
 NGX_CMD_REOPEN	c/nginx-0.6.31/src/os/unix/ngx_process_cycle.h	19;"	d
 NGX_CMD_TERMINATE	c/nginx-0.6.31/src/os/unix/ngx_process_cycle.h	18;"	d
+NGX_COMPILER	c/nginx-0.6.31/objs/ngx_auto_config.h	9;"	d
+NGX_CONFIGURE	c/nginx-0.6.31/objs/ngx_auto_config.h	1;"	d
 NGX_CONF_1MORE	c/nginx-0.6.31/src/core/ngx_conf_file.h	45;"	d
 NGX_CONF_2MORE	c/nginx-0.6.31/src/core/ngx_conf_file.h	46;"	d
 NGX_CONF_ANY	c/nginx-0.6.31/src/core/ngx_conf_file.h	44;"	d
@@ -206,6 +213,8 @@ NGX_CONF_MODULE	c/nginx-0.6.31/src/core/ngx_conf_file.h	71;"	d
 NGX_CONF_MULTI	c/nginx-0.6.31/src/core/ngx_conf_file.h	47;"	d
 NGX_CONF_NOARGS	c/nginx-0.6.31/src/core/ngx_conf_file.h	21;"	d
 NGX_CONF_OK	c/nginx-0.6.31/src/core/ngx_conf_file.h	63;"	d
+NGX_CONF_PATH	c/nginx-0.6.31/objs/ngx_auto_config.h	232;"	d
+NGX_CONF_PREFIX	c/nginx-0.6.31/objs/ngx_auto_config.h	227;"	d
 NGX_CONF_TAKE1	c/nginx-0.6.31/src/core/ngx_conf_file.h	22;"	d
 NGX_CONF_TAKE12	c/nginx-0.6.31/src/core/ngx_conf_file.h	32;"	d
 NGX_CONF_TAKE123	c/nginx-0.6.31/src/core/ngx_conf_file.h	37;"	d
@@ -224,8 +233,10 @@ NGX_CONF_UNSET_PTR	c/nginx-0.6.31/src/core/ngx_conf_file.h	58;"	d
 NGX_CONF_UNSET_SIZE	c/nginx-0.6.31/src/core/ngx_conf_file.h	59;"	d
 NGX_CONF_UNSET_UINT	c/nginx-0.6.31/src/core/ngx_conf_file.h	57;"	d
 NGX_CORE_MODULE	c/nginx-0.6.31/src/core/ngx_conf_file.h	70;"	d
+NGX_CPU_CACHE_LINE	c/nginx-0.6.31/objs/ngx_auto_config.h	59;"	d
 NGX_CV_SIGNAL	c/nginx-0.6.31/src/os/unix/ngx_freebsd_rfork_thread.h	34;"	d
 NGX_CYCLE_POOL_SIZE	c/nginx-0.6.31/src/core/ngx_cycle.h	16;"	d
+NGX_DEBUG	c/nginx-0.6.31/objs/ngx_auto_config.h	4;"	d
 NGX_DEBUG_POINTS_ABORT	c/nginx-0.6.31/src/core/ngx_cycle.h	21;"	d
 NGX_DEBUG_POINTS_STOP	c/nginx-0.6.31/src/core/ngx_cycle.h	20;"	d
 NGX_DECLINED	c/nginx-0.6.31/src/core/ngx_core.h	33;"	d
@@ -275,6 +286,7 @@ NGX_ERROR_CRIT	c/nginx-0.6.31/src/core/ngx_connection.h	/^     NGX_ERROR_CRIT = 
 NGX_ERROR_ERR	c/nginx-0.6.31/src/core/ngx_connection.h	/^     NGX_ERROR_ERR,$/;"	e	enum:__anon66
 NGX_ERROR_IGNORE_ECONNRESET	c/nginx-0.6.31/src/core/ngx_connection.h	/^     NGX_ERROR_IGNORE_ECONNRESET$/;"	e	enum:__anon66
 NGX_ERROR_INFO	c/nginx-0.6.31/src/core/ngx_connection.h	/^     NGX_ERROR_INFO,$/;"	e	enum:__anon66
+NGX_ERROR_LOG_PATH	c/nginx-0.6.31/objs/ngx_auto_config.h	247;"	d
 NGX_ESCAPE_ARGS	c/nginx-0.6.31/src/core/ngx_string.h	159;"	d
 NGX_ESCAPE_HTML	c/nginx-0.6.31/src/core/ngx_string.h	160;"	d
 NGX_ESCAPE_MAIL_AUTH	c/nginx-0.6.31/src/core/ngx_string.h	163;"	d
@@ -297,6 +309,7 @@ NGX_FILE_WRONLY	c/nginx-0.6.31/src/os/unix/ngx_files.h	35;"	d
 NGX_FLUSH_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	322;"	d
 NGX_FLUSH_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	351;"	d
 NGX_FLUSH_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	352;"	d
+NGX_GROUP	c/nginx-0.6.31/objs/ngx_auto_config.h	277;"	d
 NGX_HASH_ELT_SIZE	c/nginx-0.6.31/src/core/ngx_hash.c	229;"	d	file:
 NGX_HASH_LARGE	c/nginx-0.6.31/src/core/ngx_hash.h	65;"	d
 NGX_HASH_LARGE_ASIZE	c/nginx-0.6.31/src/core/ngx_hash.h	67;"	d
@@ -313,18 +326,47 @@ NGX_HAVE_ATOMIC_OPS	c/nginx-0.6.31/src/os/unix/ngx_atomic.h	190;"	d
 NGX_HAVE_ATOMIC_OPS	c/nginx-0.6.31/src/os/unix/ngx_atomic.h	219;"	d
 NGX_HAVE_ATOMIC_OPS	c/nginx-0.6.31/src/os/unix/ngx_atomic.h	33;"	d
 NGX_HAVE_ATOMIC_OPS	c/nginx-0.6.31/src/os/unix/ngx_atomic.h	81;"	d
+NGX_HAVE_C99_VARIADIC_MACROS	c/nginx-0.6.31/objs/ngx_auto_config.h	19;"	d
+NGX_HAVE_CLEAR_EVENT	c/nginx-0.6.31/objs/ngx_auto_config.h	29;"	d
+NGX_HAVE_CRYPT_H	c/nginx-0.6.31/objs/ngx_auto_headers.h	19;"	d
 NGX_HAVE_DEFERRED_ACCEPT	c/nginx-0.6.31/src/os/unix/ngx_freebsd_config.h	89;"	d
 NGX_HAVE_DEFERRED_ACCEPT	c/nginx-0.6.31/src/os/unix/ngx_linux_config.h	86;"	d
+NGX_HAVE_EPOLL	c/nginx-0.6.31/objs/ngx_auto_config.h	24;"	d
+NGX_HAVE_FIONBIO	c/nginx-0.6.31/objs/ngx_auto_config.h	192;"	d
+NGX_HAVE_GCC_VARIADIC_MACROS	c/nginx-0.6.31/objs/ngx_auto_config.h	14;"	d
+NGX_HAVE_GMTOFF	c/nginx-0.6.31/objs/ngx_auto_config.h	197;"	d
 NGX_HAVE_GNU_CRYPT_R	c/nginx-0.6.31/src/os/unix/ngx_linux_config.h	97;"	d
+NGX_HAVE_GNU_STRERROR_R	c/nginx-0.6.31/objs/ngx_auto_config.h	147;"	d
 NGX_HAVE_INHERITED_NONBLOCK	c/nginx-0.6.31/src/os/unix/ngx_freebsd_config.h	105;"	d
 NGX_HAVE_INHERITED_NONBLOCK	c/nginx-0.6.31/src/os/unix/ngx_linux_config.h	102;"	d
 NGX_HAVE_INHERITED_NONBLOCK	c/nginx-0.6.31/src/os/unix/ngx_solaris_config.h	89;"	d
+NGX_HAVE_INTTYPES_H	c/nginx-0.6.31/objs/ngx_auto_headers.h	9;"	d
+NGX_HAVE_LIMITS_H	c/nginx-0.6.31/objs/ngx_auto_headers.h	14;"	d
+NGX_HAVE_LITTLE_ENDIAN	c/nginx-0.6.31/objs/ngx_auto_config.h	102;"	d
+NGX_HAVE_LOCALTIME_R	c/nginx-0.6.31/objs/ngx_auto_config.h	152;"	d
+NGX_HAVE_MAP_ANON	c/nginx-0.6.31/objs/ngx_auto_config.h	172;"	d
+NGX_HAVE_MAP_DEVZERO	c/nginx-0.6.31/objs/ngx_auto_config.h	177;"	d
+NGX_HAVE_MEMALIGN	c/nginx-0.6.31/objs/ngx_auto_config.h	162;"	d
+NGX_HAVE_MSGHDR_MSG_CONTROL	c/nginx-0.6.31/objs/ngx_auto_config.h	187;"	d
+NGX_HAVE_NONALIGNED	c/nginx-0.6.31/objs/ngx_auto_config.h	54;"	d
 NGX_HAVE_OS_SPECIFIC_INIT	c/nginx-0.6.31/src/os/unix/ngx_freebsd_config.h	109;"	d
 NGX_HAVE_OS_SPECIFIC_INIT	c/nginx-0.6.31/src/os/unix/ngx_linux_config.h	106;"	d
 NGX_HAVE_OS_SPECIFIC_INIT	c/nginx-0.6.31/src/os/unix/ngx_solaris_config.h	99;"	d
+NGX_HAVE_POSIX_MEMALIGN	c/nginx-0.6.31/objs/ngx_auto_config.h	157;"	d
+NGX_HAVE_PREAD	c/nginx-0.6.31/objs/ngx_auto_config.h	137;"	d
+NGX_HAVE_PR_SET_DUMPABLE	c/nginx-0.6.31/objs/ngx_auto_config.h	44;"	d
+NGX_HAVE_PWRITE	c/nginx-0.6.31/objs/ngx_auto_config.h	142;"	d
+NGX_HAVE_SCHED_SETAFFINITY	c/nginx-0.6.31/objs/ngx_auto_config.h	49;"	d
+NGX_HAVE_SCHED_YIELD	c/nginx-0.6.31/objs/ngx_auto_config.h	167;"	d
+NGX_HAVE_SENDFILE	c/nginx-0.6.31/objs/ngx_auto_config.h	34;"	d
+NGX_HAVE_SENDFILE64	c/nginx-0.6.31/objs/ngx_auto_config.h	39;"	d
 NGX_HAVE_SO_SNDLOWAT	c/nginx-0.6.31/src/core/ngx_config.h	43;"	d
 NGX_HAVE_SO_SNDLOWAT	c/nginx-0.6.31/src/os/unix/ngx_linux_config.h	92;"	d
 NGX_HAVE_SO_SNDLOWAT	c/nginx-0.6.31/src/os/unix/ngx_solaris_config.h	95;"	d
+NGX_HAVE_SYSVSHM	c/nginx-0.6.31/objs/ngx_auto_config.h	182;"	d
+NGX_HAVE_SYS_PRCTL_H	c/nginx-0.6.31/objs/ngx_auto_headers.h	29;"	d
+NGX_HAVE_UNISTD_H	c/nginx-0.6.31/objs/ngx_auto_headers.h	4;"	d
+NGX_HAVE_UNIX_DOMAIN	c/nginx-0.6.31/objs/ngx_auto_config.h	87;"	d
 NGX_HAVE_VARIADIC_MACROS	c/nginx-0.6.31/src/core/ngx_log.h	105;"	d
 NGX_HAVE_VARIADIC_MACROS	c/nginx-0.6.31/src/core/ngx_log.h	73;"	d
 NGX_HAVE_VARIADIC_MACROS	c/nginx-0.6.31/src/core/ngx_log.h	89;"	d
@@ -351,6 +393,7 @@ NGX_HTTP_CACHE_THE_SAME	c/nginx-0.6.31/src/http/ngx_http_cache.h	115;"	d
 NGX_HTTP_CHARSET_VAR	c/nginx-0.6.31/src/http/modules/ngx_http_charset_filter_module.c	13;"	d	file:
 NGX_HTTP_CLIENT_CLOSED_REQUEST	c/nginx-0.6.31/src/http/ngx_http_request.h	112;"	d
 NGX_HTTP_CLIENT_ERROR	c/nginx-0.6.31/src/http/ngx_http_request.h	51;"	d
+NGX_HTTP_CLIENT_TEMP_PATH	c/nginx-0.6.31/objs/ngx_auto_config.h	257;"	d
 NGX_HTTP_CLOSE	c/nginx-0.6.31/src/http/ngx_http_request.h	91;"	d
 NGX_HTTP_CONFLICT	c/nginx-0.6.31/src/http/ngx_http_request.h	79;"	d
 NGX_HTTP_CONNECTION_CLOSE	c/nginx-0.6.31/src/http/ngx_http_request.h	42;"	d
@@ -381,6 +424,7 @@ NGX_HTTP_FASTCGI_RESPONDER	c/nginx-0.6.31/src/http/modules/ngx_http_fastcgi_modu
 NGX_HTTP_FASTCGI_STDERR	c/nginx-0.6.31/src/http/modules/ngx_http_fastcgi_module.c	68;"	d	file:
 NGX_HTTP_FASTCGI_STDIN	c/nginx-0.6.31/src/http/modules/ngx_http_fastcgi_module.c	66;"	d	file:
 NGX_HTTP_FASTCGI_STDOUT	c/nginx-0.6.31/src/http/modules/ngx_http_fastcgi_module.c	67;"	d	file:
+NGX_HTTP_FASTCGI_TEMP_PATH	c/nginx-0.6.31/objs/ngx_auto_config.h	267;"	d
 NGX_HTTP_FIND_CONFIG_PHASE	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^    NGX_HTTP_FIND_CONFIG_PHASE,$/;"	e	enum:__anon100
 NGX_HTTP_FLUSH	c/nginx-0.6.31/src/http/ngx_http.h	84;"	d
 NGX_HTTP_FORBIDDEN	c/nginx-0.6.31/src/http/ngx_http_request.h	75;"	d
@@ -421,6 +465,7 @@ NGX_HTTP_LOCATION_REGEX	c/nginx-0.6.31/src/http/ngx_http_core_module.c	23;"	d	fi
 NGX_HTTP_LOCK	c/nginx-0.6.31/src/http/ngx_http_request.h	38;"	d
 NGX_HTTP_LOC_CONF	c/nginx-0.6.31/src/http/ngx_http_config.h	42;"	d
 NGX_HTTP_LOC_CONF_OFFSET	c/nginx-0.6.31/src/http/ngx_http_config.h	51;"	d
+NGX_HTTP_LOG_PATH	c/nginx-0.6.31/objs/ngx_auto_config.h	252;"	d
 NGX_HTTP_LOG_PHASE	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^    NGX_HTTP_LOG_PHASE$/;"	e	enum:__anon100
 NGX_HTTP_LOWLEVEL_BUFFERED	c/nginx-0.6.31/src/http/ngx_http_request.h	123;"	d
 NGX_HTTP_MAIN_CONF	c/nginx-0.6.31/src/http/ngx_http_config.h	40;"	d
@@ -459,7 +504,9 @@ NGX_HTTP_PRECONDITION_FAILED	c/nginx-0.6.31/src/http/ngx_http_request.h	81;"	d
 NGX_HTTP_PROCESS_REQUEST_STATE	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    NGX_HTTP_PROCESS_REQUEST_STATE,$/;"	e	enum:__anon72
 NGX_HTTP_PROPFIND	c/nginx-0.6.31/src/http/ngx_http_request.h	36;"	d
 NGX_HTTP_PROPPATCH	c/nginx-0.6.31/src/http/ngx_http_request.h	37;"	d
+NGX_HTTP_PROXY	c/nginx-0.6.31/objs/ngx_auto_config.h	77;"	d
 NGX_HTTP_PROXY_PARSE_NO_HEADER	c/nginx-0.6.31/src/http/modules/ngx_http_proxy_module.c	87;"	d	file:
+NGX_HTTP_PROXY_TEMP_PATH	c/nginx-0.6.31/objs/ngx_auto_config.h	262;"	d
 NGX_HTTP_PUT	c/nginx-0.6.31/src/http/ngx_http_request.h	30;"	d
 NGX_HTTP_RANGE_NOT_SATISFIABLE	c/nginx-0.6.31/src/http/ngx_http_request.h	85;"	d
 NGX_HTTP_READING_REQUEST_STATE	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    NGX_HTTP_READING_REQUEST_STATE,$/;"	e	enum:__anon72
@@ -471,6 +518,7 @@ NGX_HTTP_REQUEST_BODY_FILE_ON	c/nginx-0.6.31/src/http/ngx_http_core_module.c	27;
 NGX_HTTP_REQUEST_ENTITY_TOO_LARGE	c/nginx-0.6.31/src/http/ngx_http_request.h	82;"	d
 NGX_HTTP_REQUEST_TIME_OUT	c/nginx-0.6.31/src/http/ngx_http_request.h	78;"	d
 NGX_HTTP_REQUEST_URI_TOO_LARGE	c/nginx-0.6.31/src/http/ngx_http_request.h	83;"	d
+NGX_HTTP_REWRITE	c/nginx-0.6.31/objs/ngx_auto_config.h	72;"	d
 NGX_HTTP_REWRITE_PHASE	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^    NGX_HTTP_REWRITE_PHASE,$/;"	e	enum:__anon100
 NGX_HTTP_SATISFY_ALL	c/nginx-0.6.31/src/http/ngx_http_core_module.h	27;"	d
 NGX_HTTP_SATISFY_ANY	c/nginx-0.6.31/src/http/ngx_http_core_module.h	28;"	d
@@ -480,6 +528,7 @@ NGX_HTTP_SIF_CONF	c/nginx-0.6.31/src/http/ngx_http_config.h	44;"	d
 NGX_HTTP_SPECIAL_RESPONSE	c/nginx-0.6.31/src/http/ngx_http_request.h	68;"	d
 NGX_HTTP_SRV_CONF	c/nginx-0.6.31/src/http/ngx_http_config.h	41;"	d
 NGX_HTTP_SRV_CONF_OFFSET	c/nginx-0.6.31/src/http/ngx_http_config.h	50;"	d
+NGX_HTTP_SSI	c/nginx-0.6.31/objs/ngx_auto_config.h	67;"	d
 NGX_HTTP_SSI_ADD_PREFIX	c/nginx-0.6.31/src/http/modules/ngx_http_ssi_filter_module.c	15;"	d	file:
 NGX_HTTP_SSI_ADD_ZERO	c/nginx-0.6.31/src/http/modules/ngx_http_ssi_filter_module.c	16;"	d	file:
 NGX_HTTP_SSI_BLOCK_NAME	c/nginx-0.6.31/src/http/modules/ngx_http_ssi_filter_module.c	225;"	d	file:
@@ -575,16 +624,19 @@ NGX_IOVS	c/nginx-0.6.31/src/os/unix/ngx_writev_chain.c	13;"	d	file:
 NGX_IOVS	c/nginx-0.6.31/src/os/unix/ngx_writev_chain.c	15;"	d	file:
 NGX_IO_SENDFILE	c/nginx-0.6.31/src/os/unix/ngx_os.h	15;"	d
 NGX_IO_ZEROCOPY	c/nginx-0.6.31/src/os/unix/ngx_os.h	16;"	d
+NGX_KQUEUE_UDATA_T	c/nginx-0.6.31/objs/ngx_auto_config.h	63;"	d
 NGX_LEVEL_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	354;"	d
 NGX_LEVEL_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	367;"	d
 NGX_LEVEL_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	376;"	d
 NGX_LEVEL_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	389;"	d
 NGX_LEVEL_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	398;"	d
 NGX_LINEFEED_SIZE	c/nginx-0.6.31/src/os/unix/ngx_files.h	75;"	d
+NGX_LINUX	c/nginx-0.6.31/objs/ngx_auto_headers.h	24;"	d
 NGX_LISTEN_BACKLOG	c/nginx-0.6.31/src/os/unix/ngx_freebsd_config.h	85;"	d
 NGX_LISTEN_BACKLOG	c/nginx-0.6.31/src/os/unix/ngx_linux_config.h	82;"	d
 NGX_LISTEN_BACKLOG	c/nginx-0.6.31/src/os/unix/ngx_posix_config.h	106;"	d
 NGX_LISTEN_BACKLOG	c/nginx-0.6.31/src/os/unix/ngx_solaris_config.h	85;"	d
+NGX_LOCK_PATH	c/nginx-0.6.31/objs/ngx_auto_config.h	242;"	d
 NGX_LOG_ALERT	c/nginx-0.6.31/src/core/ngx_log.h	17;"	d
 NGX_LOG_CRIT	c/nginx-0.6.31/src/core/ngx_log.h	18;"	d
 NGX_LOG_DEBUG	c/nginx-0.6.31/src/core/ngx_log.h	23;"	d
@@ -634,9 +686,11 @@ NGX_MAXHOSTNAMELEN	c/nginx-0.6.31/src/core/ngx_config.h	119;"	d
 NGX_MAX_ALLOC_FROM_POOL	c/nginx-0.6.31/src/core/ngx_palloc.h	20;"	d
 NGX_MAX_CONF_ERRSTR	c/nginx-0.6.31/src/core/ngx_conf_file.h	74;"	d
 NGX_MAX_ERROR_STR	c/nginx-0.6.31/src/core/ngx_log.h	66;"	d
+NGX_MAX_OFF_T_VALUE	c/nginx-0.6.31/objs/ngx_auto_config.h	117;"	d
 NGX_MAX_PATH	c/nginx-0.6.31/src/os/unix/ngx_files.h	109;"	d
 NGX_MAX_PATH_LEVEL	c/nginx-0.6.31/src/core/ngx_file.h	32;"	d
 NGX_MAX_PROCESSES	c/nginx-0.6.31/src/os/unix/ngx_process.h	45;"	d
+NGX_MAX_SIZE_T_VALUE	c/nginx-0.6.31/objs/ngx_auto_config.h	107;"	d
 NGX_MAX_THREADS	c/nginx-0.6.31/src/os/unix/ngx_thread.h	16;"	d
 NGX_MAX_UINT32_VALUE	c/nginx-0.6.31/src/core/ngx_config.h	126;"	d
 NGX_MAX_UINT32_VALUE	c/nginx-0.6.31/src/core/ngx_config.h	128;"	d
@@ -650,6 +704,7 @@ NGX_NOACCEPT_SIGNAL	c/nginx-0.6.31/src/core/ngx_config.h	57;"	d
 NGX_NONE	c/nginx-0.6.31/src/core/ngx_output_chain.c	17;"	d	file:
 NGX_NONE	c/nginx-0.6.31/src/http/ngx_http_request.h	46;"	d
 NGX_NO_RESOLVER	c/nginx-0.6.31/src/core/ngx_resolver.h	30;"	d
+NGX_OFF_T_LEN	c/nginx-0.6.31/objs/ngx_auto_config.h	122;"	d
 NGX_OK	c/nginx-0.6.31/src/core/ngx_core.h	28;"	d
 NGX_OLDPID_EXT	c/nginx-0.6.31/src/core/nginx.h	15;"	d
 NGX_ONESHOT_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	355;"	d
@@ -658,9 +713,11 @@ NGX_ONESHOT_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	378;"	d
 NGX_ONESHOT_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	390;"	d
 NGX_ONESHOT_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	399;"	d
 NGX_PARSE_LARGE_TIME	c/nginx-0.6.31/src/core/ngx_parse.h	15;"	d
+NGX_PCRE	c/nginx-0.6.31/objs/ngx_auto_config.h	82;"	d
 NGX_PEER_FAILED	c/nginx-0.6.31/src/event/ngx_event_connect.h	18;"	d
 NGX_PEER_KEEPALIVE	c/nginx-0.6.31/src/event/ngx_event_connect.h	16;"	d
 NGX_PEER_NEXT	c/nginx-0.6.31/src/event/ngx_event_connect.h	17;"	d
+NGX_PID_PATH	c/nginx-0.6.31/objs/ngx_auto_config.h	237;"	d
 NGX_POP3_APOP	c/nginx-0.6.31/src/mail/ngx_mail.h	209;"	d
 NGX_POP3_AUTH	c/nginx-0.6.31/src/mail/ngx_mail.h	210;"	d
 NGX_POP3_CAPA	c/nginx-0.6.31/src/mail/ngx_mail.h	205;"	d
@@ -678,6 +735,7 @@ NGX_POP3_UIDL	c/nginx-0.6.31/src/mail/ngx_mail.h	217;"	d
 NGX_POP3_USER	c/nginx-0.6.31/src/mail/ngx_mail.h	203;"	d
 NGX_POST_EVENTS	c/nginx-0.6.31/src/event/ngx_event.h	493;"	d
 NGX_POST_THREAD_EVENTS	c/nginx-0.6.31/src/event/ngx_event.h	494;"	d
+NGX_PREFIX	c/nginx-0.6.31/objs/ngx_auto_config.h	217;"	d
 NGX_PROCESS_DETACHED	c/nginx-0.6.31/src/os/unix/ngx_process.h	50;"	d
 NGX_PROCESS_JUST_RESPAWN	c/nginx-0.6.31/src/os/unix/ngx_process.h	49;"	d
 NGX_PROCESS_MASTER	c/nginx-0.6.31/src/os/unix/ngx_process_cycle.h	23;"	d
@@ -685,6 +743,7 @@ NGX_PROCESS_NORESPAWN	c/nginx-0.6.31/src/os/unix/ngx_process.h	47;"	d
 NGX_PROCESS_RESPAWN	c/nginx-0.6.31/src/os/unix/ngx_process.h	48;"	d
 NGX_PROCESS_SINGLE	c/nginx-0.6.31/src/os/unix/ngx_process_cycle.h	22;"	d
 NGX_PROCESS_WORKER	c/nginx-0.6.31/src/os/unix/ngx_process_cycle.h	24;"	d
+NGX_PTR_SIZE	c/nginx-0.6.31/objs/ngx_auto_config.h	92;"	d
 NGX_RADIX_NO_VALUE	c/nginx-0.6.31/src/core/ngx_radix_tree.h	15;"	d
 NGX_READ_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	332;"	d
 NGX_READ_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	364;"	d
@@ -710,6 +769,7 @@ NGX_RESOLVE_REFUSED	c/nginx-0.6.31/src/core/ngx_resolver.h	26;"	d
 NGX_RESOLVE_SERVFAIL	c/nginx-0.6.31/src/core/ngx_resolver.h	23;"	d
 NGX_RESOLVE_TIMEDOUT	c/nginx-0.6.31/src/core/ngx_resolver.h	27;"	d
 NGX_RESOLVE_TXT	c/nginx-0.6.31/src/core/ngx_resolver.h	19;"	d
+NGX_SBIN_PATH	c/nginx-0.6.31/objs/ngx_auto_config.h	222;"	d
 NGX_SENDFILEVECS	c/nginx-0.6.31/src/os/unix/ngx_solaris_sendfilev_chain.c	35;"	d	file:
 NGX_SENDFILEVECS	c/nginx-0.6.31/src/os/unix/ngx_solaris_sendfilev_chain.c	37;"	d	file:
 NGX_SENDFILE_LIMIT	c/nginx-0.6.31/src/os/unix/ngx_linux_config.h	68;"	d
@@ -719,6 +779,8 @@ NGX_SETPROCTITLE_PAD	c/nginx-0.6.31/src/os/unix/ngx_setproctitle.h	34;"	d
 NGX_SETPROCTITLE_USES_ENV	c/nginx-0.6.31/src/os/unix/ngx_setproctitle.h	25;"	d
 NGX_SETPROCTITLE_USES_ENV	c/nginx-0.6.31/src/os/unix/ngx_setproctitle.h	33;"	d
 NGX_SHUTDOWN_SIGNAL	c/nginx-0.6.31/src/core/ngx_config.h	55;"	d
+NGX_SIG_ATOMIC_T_SIZE	c/nginx-0.6.31/objs/ngx_auto_config.h	97;"	d
+NGX_SIZE_T_LEN	c/nginx-0.6.31/objs/ngx_auto_config.h	112;"	d
 NGX_SLAB_BIG	c/nginx-0.6.31/src/core/ngx_slab.c	29;"	d	file:
 NGX_SLAB_BUSY	c/nginx-0.6.31/src/core/ngx_slab.c	43;"	d	file:
 NGX_SLAB_BUSY	c/nginx-0.6.31/src/core/ngx_slab.c	55;"	d	file:
@@ -738,6 +800,7 @@ NGX_SLAB_PAGE_START	c/nginx-0.6.31/src/core/ngx_slab.c	49;"	d	file:
 NGX_SLAB_SHIFT_MASK	c/nginx-0.6.31/src/core/ngx_slab.c	39;"	d	file:
 NGX_SLAB_SHIFT_MASK	c/nginx-0.6.31/src/core/ngx_slab.c	51;"	d	file:
 NGX_SLAB_SMALL	c/nginx-0.6.31/src/core/ngx_slab.c	31;"	d	file:
+NGX_SMP	c/nginx-0.6.31/objs/ngx_auto_config.h	212;"	d
 NGX_SMP_LOCK	c/nginx-0.6.31/src/os/unix/ngx_gcc_atomic_amd64.h	10;"	d
 NGX_SMP_LOCK	c/nginx-0.6.31/src/os/unix/ngx_gcc_atomic_amd64.h	8;"	d
 NGX_SMP_LOCK	c/nginx-0.6.31/src/os/unix/ngx_gcc_atomic_x86.h	10;"	d
@@ -769,6 +832,7 @@ NGX_SSL_NO_SCACHE	c/nginx-0.6.31/src/event/ngx_event_openssl.h	56;"	d
 NGX_SSL_SSLv2	c/nginx-0.6.31/src/event/ngx_event_openssl.h	85;"	d
 NGX_SSL_SSLv3	c/nginx-0.6.31/src/event/ngx_event_openssl.h	86;"	d
 NGX_SSL_TLSv1	c/nginx-0.6.31/src/event/ngx_event_openssl.h	87;"	d
+NGX_SUPPRESS_WARN	c/nginx-0.6.31/objs/ngx_auto_config.h	207;"	d
 NGX_TCP_NODELAY_DISABLED	c/nginx-0.6.31/src/core/ngx_connection.h	/^     NGX_TCP_NODELAY_DISABLED$/;"	e	enum:__anon67
 NGX_TCP_NODELAY_SET	c/nginx-0.6.31/src/core/ngx_connection.h	/^     NGX_TCP_NODELAY_SET,$/;"	e	enum:__anon67
 NGX_TCP_NODELAY_UNSET	c/nginx-0.6.31/src/core/ngx_connection.h	/^     NGX_TCP_NODELAY_UNSET = 0,$/;"	e	enum:__anon67
@@ -788,17 +852,21 @@ NGX_TID_T_FMT	c/nginx-0.6.31/src/os/unix/ngx_thread.h	34;"	d
 NGX_TIMER_INFINITE	c/nginx-0.6.31/src/event/ngx_event_timer.h	16;"	d
 NGX_TIMER_LAZY_DELAY	c/nginx-0.6.31/src/event/ngx_event_timer.h	18;"	d
 NGX_TIME_SLOTS	c/nginx-0.6.31/src/core/ngx_times.c	20;"	d	file:
+NGX_TIME_T_LEN	c/nginx-0.6.31/objs/ngx_auto_config.h	132;"	d
+NGX_TIME_T_SIZE	c/nginx-0.6.31/objs/ngx_auto_config.h	127;"	d
 NGX_TRAILERS	c/nginx-0.6.31/src/os/unix/ngx_freebsd_sendfile_chain.c	33;"	d	file:
 NGX_TRAILERS	c/nginx-0.6.31/src/os/unix/ngx_freebsd_sendfile_chain.c	36;"	d	file:
 NGX_UNESCAPE_REDIRECT	c/nginx-0.6.31/src/core/ngx_string.h	166;"	d
 NGX_UNESCAPE_URI	c/nginx-0.6.31/src/core/ngx_string.h	165;"	d
 NGX_UPDATE_TIME	c/nginx-0.6.31/src/event/ngx_event.h	492;"	d
+NGX_USER	c/nginx-0.6.31/objs/ngx_auto_config.h	272;"	d
 NGX_USE_AIO_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	269;"	d
 NGX_USE_CLEAR_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	236;"	d
 NGX_USE_EPOLL_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	258;"	d
 NGX_USE_EVENTPORT_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	293;"	d
 NGX_USE_FD_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	281;"	d
 NGX_USE_GREEDY_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	253;"	d
+NGX_USE_HTTP_FILE_CACHE_UNIQ	c/nginx-0.6.31/objs/ngx_auto_config.h	202;"	d
 NGX_USE_IOCP_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	275;"	d
 NGX_USE_KQUEUE_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	242;"	d
 NGX_USE_LEVEL_EVENT	c/nginx-0.6.31/src/event/ngx_event.h	224;"	d
@@ -852,7 +920,6 @@ TRACE	c/ngx_util/debug.h	64;"	d
 TR_TBL	c/ngx_http_vwrite_module/debug.h	97;"	d
 TR_TBL	c/ngx_util/debug.h	81;"	d
 VALUE	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	176;"	d	file:
-VALUE	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	156;"	d	file:
 _FILE_OFFSET_BITS	c/nginx-0.6.31/src/os/unix/ngx_linux_config.h	15;"	d
 _FILE_OFFSET_BITS	c/nginx-0.6.31/src/os/unix/ngx_solaris_config.h	15;"	d
 _GNU_SOURCE	c/nginx-0.6.31/src/os/unix/ngx_linux_config.h	12;"	d
@@ -945,11 +1012,9 @@ _SN_LOG_TO	c/ngx_util/debug.h	21;"	d
 _XOPEN_SOURCE	c/nginx-0.6.31/src/os/unix/ngx_posix_config.h	12;"	d
 _XOPEN_SOURCE_EXTENDED	c/nginx-0.6.31/src/os/unix/ngx_posix_config.h	13;"	d
 __END	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	174;"	d	file:
-__END	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	154;"	d	file:
 __FreeBSD__	c/nginx-0.6.31/src/core/ngx_config.h	15;"	d
 __FreeBSD_version	c/nginx-0.6.31/src/core/ngx_config.h	16;"	d
 __VALUE	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	173;"	d	file:
-__VALUE	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	153;"	d	file:
 __error	c/nginx-0.6.31/src/os/unix/ngx_freebsd_rfork_thread.c	/^__error()$/;"	f
 __ngx_util__	c/ngx_util/ngx_util.h	5;"	d
 _spinlock	c/nginx-0.6.31/src/os/unix/ngx_freebsd_rfork_thread.c	/^_spinlock(ngx_atomic_t *lock)$/;"	f
@@ -1051,8 +1116,6 @@ args	c/nginx-0.6.31/src/mail/ngx_mail.h	/^    ngx_array_t             args;$/;"	
 args_start	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    u_char                           *args_start;$/;"	m	struct:ngx_http_request_s
 argument_number	c/nginx-0.6.31/src/core/ngx_conf_file.c	/^static int argument_number[] = {$/;"	v	file:
 argv	c/nginx-0.6.31/src/os/unix/ngx_process.h	/^    char *const  *argv;$/;"	m	struct:__anon11
-array_join	c/ngx_util/ngx_util.h	/^array_join(ngx_pool_t *p,  ngx_str_t *re, ngx_array_t *arr, ngx_str_t *head, ngx_str_t *tail, $/;"	f
-array_join_x	c/ngx_util/ngx_util.h	/^array_join_x($/;"	f
 auth_capability	c/nginx-0.6.31/src/mail/ngx_mail_pop3_module.h	/^    ngx_str_t    auth_capability;$/;"	m	struct:__anon213
 auth_method	c/nginx-0.6.31/src/mail/ngx_mail.h	/^    unsigned                auth_method:2;$/;"	m	struct:__anon227
 auth_methods	c/nginx-0.6.31/src/mail/ngx_mail_imap_module.h	/^    ngx_uint_t   auth_methods;$/;"	m	struct:__anon210
@@ -1407,7 +1470,7 @@ delete_deferred	c/nginx-0.6.31/src/core/ngx_connection.h	/^    unsigned         
 delete_file	c/nginx-0.6.31/src/core/ngx_file.h	/^    unsigned            delete_file:1;$/;"	m	struct:__anon41
 deleted	c/nginx-0.6.31/src/core/ngx_garbage_collector.h	/^    u_int               deleted;$/;"	m	struct:ngx_gc_s
 deleted	c/nginx-0.6.31/src/http/ngx_http_cache.h	/^    unsigned         deleted:1;$/;"	m	struct:__anon203
-delim	c/ngx_http_list_module/ngx_http_list_module.c	/^  u_char delim;$/;"	m	struct:__anon254	file:
+delim	c/ngx_http_list_module/ngx_http_list_module.c	/^  u_char delim;$/;"	m	struct:__anon252	file:
 deny	c/nginx-0.6.31/src/http/modules/ngx_http_access_module.c	/^    ngx_uint_t    deny;      \/* unsigned  deny:1; *\/$/;"	m	struct:__anon190	file:
 depth	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_table_elt_t                  *depth;$/;"	m	struct:__anon75
 destination	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_table_elt_t                  *destination;$/;"	m	struct:__anon75
@@ -1463,7 +1526,6 @@ end	c/nginx-0.6.31/src/core/ngx_slab.h	/^    u_char           *end;$/;"	m	struct
 end	c/nginx-0.6.31/src/http/modules/ngx_http_fastcgi_module.c	/^    u_char                        *end;$/;"	m	struct:__anon136	file:
 end	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_str_t end;$/;"	m	struct:mc_res_s	file:
 end	c/nginx-0.6.31/src/http/modules/ngx_http_range_filter_module.c	/^    off_t        end;$/;"	m	struct:__anon185	file:
-end	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_str_t end;$/;"	m	struct:mc_res_s	file:
 end	c/ngx_http_rand_module/ngx_http_rand_module.c	/^  ngx_uint_t end;$/;"	m	struct:__anon3	file:
 engine	c/nginx-0.6.31/src/event/ngx_event_openssl.c	/^    ngx_str_t  engine;$/;"	m	struct:__anon232	file:
 env	c/nginx-0.6.31/src/core/ngx_cycle.h	/^     ngx_array_t              env;$/;"	m	struct:__anon49
@@ -1599,7 +1661,6 @@ filter_need_in_memory	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    unsigned 
 filter_need_temporary	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    unsigned                          filter_need_temporary:1;$/;"	m	struct:ngx_http_request_s
 finalize_request	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    void                          (*finalize_request)(ngx_http_request_t *r,$/;"	m	struct:ngx_http_upstream_s
 flag	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_str_t flag;$/;"	m	struct:mc_res_s	file:
-flag	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_str_t flag;$/;"	m	struct:mc_res_s	file:
 flags	c/nginx-0.6.31/src/http/modules/ngx_http_fastcgi_module.c	/^    u_char  flags;$/;"	m	struct:__anon139	file:
 flags	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_uint_t                      flags;$/;"	m	struct:ngx_http_upstream_srv_conf_s
 flags	c/nginx-0.6.31/src/http/ngx_http_variables.h	/^    ngx_uint_t                    flags;$/;"	m	struct:ngx_http_variable_s
@@ -1696,12 +1757,11 @@ hash	c/nginx-0.6.31/src/http/ngx_http_cache.h	/^    ngx_http_cache_hash_t    *ha
 hash	c/nginx-0.6.31/src/http/ngx_http_cache.h	/^    size_t                    hash;$/;"	m	struct:__anon206
 hash	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^    ngx_hash_t                 hash;$/;"	m	struct:__anon108
 hash	c/nginx-0.6.31/src/mail/ngx_mail_auth_http_module.c	/^    ngx_uint_t                      hash;   \/* no needed ? *\/$/;"	m	struct:ngx_mail_auth_http_ctx_s	file:
-hash	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    ngx_uint_t                        hash;$/;"	m	struct:__anon258	file:
+hash	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    ngx_uint_t                        hash;$/;"	m	struct:__anon256	file:
 hash_bucket_size	c/nginx-0.6.31/src/http/modules/ngx_http_map_module.c	/^    ngx_uint_t                  hash_bucket_size;$/;"	m	struct:__anon131	file:
 hash_function	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_uint_t                    (*hash_function)(u_char *data, size_t len);$/;"	m	struct:ngx_http_upstream_srv_conf_s
 hash_max_size	c/nginx-0.6.31/src/http/modules/ngx_http_map_module.c	/^    ngx_uint_t                  hash_max_size;$/;"	m	struct:__anon131	file:
 head	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_str_t head;$/;"	m	struct:mc_res_s	file:
-head	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_str_t head;$/;"	m	struct:mc_res_s	file:
 header	c/nginx-0.6.31/src/http/modules/ngx_http_autoindex_module.c	/^static u_char header[] =$/;"	v	file:
 header	c/nginx-0.6.31/src/mail/ngx_mail_auth_http_module.c	/^    ngx_str_t                       header;$/;"	m	struct:__anon211	file:
 header_end	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    u_char                           *header_end;$/;"	m	struct:ngx_http_request_s
@@ -1764,14 +1824,14 @@ ident	c/nginx-0.6.31/src/core/ngx_resolver.h	/^    ngx_int_t                 ide
 ident_hi	c/nginx-0.6.31/src/core/ngx_resolver.c	/^    u_char  ident_hi;$/;"	m	struct:__anon32	file:
 ident_lo	c/nginx-0.6.31/src/core/ngx_resolver.c	/^    u_char  ident_lo;$/;"	m	struct:__anon32	file:
 idle	c/nginx-0.6.31/src/core/ngx_connection.h	/^    unsigned            idle:1;$/;"	m	struct:ngx_connection_s
-idx	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_int_t idx;$/;"	m	struct:__anon254	file:
+idx	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_int_t idx;$/;"	m	struct:__anon252	file:
 if_modified_since	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_table_elt_t                  *if_modified_since;$/;"	m	struct:__anon75
 if_range	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_table_elt_t                  *if_range;$/;"	m	struct:__anon75
 ignore	c/nginx-0.6.31/src/core/ngx_connection.h	/^    unsigned            ignore:1;$/;"	m	struct:ngx_listening_s
 ignore_client_abort	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_flag_t                      ignore_client_abort;$/;"	m	struct:__anon114
 ignore_invalid_headers	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^    ngx_flag_t                 ignore_invalid_headers;$/;"	m	struct:__anon104
 ignore_recycled_buffers	c/nginx-0.6.31/src/http/modules/ngx_http_ssi_filter_module.c	/^    ngx_flag_t    ignore_recycled_buffers;$/;"	m	struct:__anon157	file:
-ii	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_int_t ii;$/;"	m	struct:__anon255	file:
+ii	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_int_t ii;$/;"	m	struct:__anon253	file:
 imap_bye	c/nginx-0.6.31/src/mail/ngx_mail_imap_handler.c	/^static u_char  imap_bye[] = "* BYE" CRLF;$/;"	v	file:
 imap_greeting	c/nginx-0.6.31/src/mail/ngx_mail_imap_handler.c	/^static u_char  imap_greeting[] = "* OK IMAP4 ready" CRLF;$/;"	v	file:
 imap_invalid_command	c/nginx-0.6.31/src/mail/ngx_mail_imap_handler.c	/^static u_char  imap_invalid_command[] = "BAD invalid command" CRLF;$/;"	v	file:
@@ -1842,7 +1902,7 @@ is_file	c/nginx-0.6.31/src/core/ngx_open_file_cache.h	/^    unsigned            
 is_file	c/nginx-0.6.31/src/core/ngx_open_file_cache.h	/^    unsigned                 is_file:1;$/;"	m	struct:ngx_cached_open_file_s
 is_link	c/nginx-0.6.31/src/core/ngx_open_file_cache.h	/^    unsigned                 is_link:1;$/;"	m	struct:__anon26
 is_link	c/nginx-0.6.31/src/core/ngx_open_file_cache.h	/^    unsigned                 is_link:1;$/;"	m	struct:ngx_cached_open_file_s
-is_rand	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_int_t is_rand;$/;"	m	struct:__anon255	file:
+is_rand	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_int_t is_rand;$/;"	m	struct:__anon253	file:
 it_interval	c/nginx-0.6.31/src/event/modules/ngx_eventport_module.c	/^    struct timespec it_interval;\/* timer period *\/$/;"	m	struct:itimerspec	typeref:struct:itimerspec::timespec	file:
 it_value	c/nginx-0.6.31/src/event/modules/ngx_eventport_module.c	/^    struct timespec it_value;   \/* timer expiration *\/$/;"	m	struct:itimerspec	typeref:struct:itimerspec::timespec	file:
 itimerspec	c/nginx-0.6.31/src/event/modules/ngx_eventport_module.c	/^typedef struct itimerspec {     \/* definition per POSIX.4 *\/$/;"	s	file:
@@ -1867,12 +1927,9 @@ key	c/nginx-0.6.31/src/http/ngx_http_cache.h	/^    char         key[1];$/;"	m	st
 key	c/nginx-0.6.31/src/http/ngx_http_cache.h	/^    ngx_array_t               key;$/;"	m	struct:__anon207
 key	c/nginx-0.6.31/src/http/ngx_http_cache.h	/^    ngx_str_t                 key;$/;"	m	struct:__anon208
 key	c/nginx-0.6.31/src/http/ngx_http_cache.h	/^    ngx_str_t        key;$/;"	m	struct:__anon203
-key	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_str_t key;$/;"	m	struct:__anon253	file:
-key	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_str_t key;$/;"	m	struct:mc_res_s	file:
 key0	c/nginx-0.6.31/src/http/ngx_http_cache.h	/^    ngx_str_t                 key0;$/;"	m	struct:__anon207
 key_hash	c/nginx-0.6.31/src/core/ngx_hash.h	/^    ngx_uint_t        key_hash;$/;"	m	struct:__anon54
 key_index	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_int_t key_index;$/;"	m	struct:__anon179	file:
-key_index	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_int_t key_index;$/;"	m	struct:__anon252	file:
 key_index	c/ngx_http_vwrite_module/ngx_http_vwrite_module.c	/^  ngx_int_t key_index;$/;"	m	struct:__anon2	file:
 key_len	c/nginx-0.6.31/src/http/ngx_http_cache.h	/^    size_t                    key_len;$/;"	m	struct:__anon207
 key_len	c/nginx-0.6.31/src/http/ngx_http_cache.h	/^    size_t       key_len;$/;"	m	struct:__anon205
@@ -1970,7 +2027,7 @@ lingering_close	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    unsigned       
 lingering_time	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^    ngx_msec_t    lingering_time;          \/* lingering_time *\/$/;"	m	struct:ngx_http_core_loc_conf_s
 lingering_time	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    time_t                            lingering_time;$/;"	m	struct:ngx_http_request_s
 lingering_timeout	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^    ngx_msec_t    lingering_timeout;       \/* lingering_timeout *\/$/;"	m	struct:ngx_http_core_loc_conf_s
-list	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_http_variable_t *list;$/;"	m	struct:__anon255	file:
+list	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_http_variable_t *list;$/;"	m	struct:__anon253	file:
 list_dlm_index	c/ngx_http_repl_module/ngx_http_repl_module.c	/^  ngx_int_t list_dlm_index;$/;"	m	struct:__anon5	file:
 list_index	c/ngx_http_repl_module/ngx_http_repl_module.c	/^  ngx_int_t list_index;$/;"	m	struct:__anon5	file:
 list_mutex	c/nginx-0.6.31/src/event/modules/ngx_kqueue_module.c	/^static ngx_mutex_t    *list_mutex;$/;"	v	file:
@@ -2033,7 +2090,6 @@ log	c/nginx-0.6.31/src/os/unix/ngx_freebsd_rfork_thread.h	/^    ngx_log_t    *lo
 log	c/nginx-0.6.31/src/os/unix/ngx_shmem.h	/^    ngx_log_t   *log;$/;"	m	struct:__anon14
 log	c/nginx-0.6.31/src/os/unix/ngx_thread.h	/^    ngx_log_t        *log;$/;"	m	struct:__anon16
 log	c/nginx-0.6.31/src/os/unix/ngx_thread.h	/^    ngx_log_t        *log;$/;"	m	struct:__anon17
-log	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	10;"	d	file:
 log_error	c/nginx-0.6.31/src/core/ngx_connection.h	/^    unsigned            log_error:2;     \/* ngx_connection_log_error_e *\/$/;"	m	struct:ngx_connection_s
 log_error	c/nginx-0.6.31/src/event/ngx_event_connect.h	/^    unsigned                         log_error:2;$/;"	m	struct:ngx_peer_connection_s
 log_handler	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_http_log_handler_pt           log_handler;$/;"	m	struct:ngx_http_request_s
@@ -2041,23 +2097,18 @@ log_level	c/nginx-0.6.31/src/core/ngx_file.h	/^    unsigned            log_level
 log_level	c/nginx-0.6.31/src/core/ngx_log.h	/^    ngx_uint_t           log_level;$/;"	m	struct:ngx_log_s
 log_level	c/nginx-0.6.31/src/core/ngx_resolver.h	/^    ngx_uint_t                log_level;$/;"	m	struct:__anon38
 log_not_found	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^    ngx_flag_t    log_not_found;           \/* log_not_found *\/$/;"	m	struct:ngx_http_core_loc_conf_s
-logc	c/ngx_util/ngx_util.h	12;"	d
-logce	c/ngx_util/ngx_util.h	13;"	d
+logc	c/ngx_util/ngx_util.h	11;"	d
+logce	c/ngx_util/ngx_util.h	12;"	d
 logcs	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	14;"	d	file:
-logcs	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	14;"	d	file:
 logd	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	11;"	d	file:
-logd	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	11;"	d	file:
 login	c/nginx-0.6.31/src/mail/ngx_mail.h	/^    ngx_str_t               login;$/;"	m	struct:__anon227
 login_attempt	c/nginx-0.6.31/src/mail/ngx_mail.h	/^    ngx_uint_t              login_attempt;$/;"	m	struct:__anon227
 logr	c/ngx_util/ngx_util.h	8;"	d
-logre	c/ngx_util/ngx_util.h	9;"	d
 logs	c/nginx-0.6.31/src/http/modules/ngx_http_log_module.c	/^    ngx_array_t                *logs;       \/* array of ngx_http_log_t *\/$/;"	m	struct:__anon199	file:
 logs	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	12;"	d	file:
-logs	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	12;"	d	file:
 logv	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	13;"	d	file:
-logv	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	13;"	d	file:
-logy	c/ngx_util/ngx_util.h	16;"	d
-logye	c/ngx_util/ngx_util.h	17;"	d
+logy	c/ngx_util/ngx_util.h	15;"	d
+logye	c/ngx_util/ngx_util.h	16;"	d
 long2ip	c/nginx-0.6.31/contrib/geo2nginx.pl	/^sub long2ip {$/;"	s
 looked	c/nginx-0.6.31/src/http/modules/ngx_http_ssi_filter_module.h	/^    size_t                    looked;$/;"	m	struct:__anon162
 looked	c/nginx-0.6.31/src/http/modules/ngx_http_sub_filter_module.c	/^    size_t         looked;$/;"	m	struct:__anon127	file:
@@ -2065,7 +2116,7 @@ low	c/nginx-0.6.31/src/core/ngx_conf_file.h	/^    ngx_int_t                 low;
 lowcase_header	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    u_char                            lowcase_header[NGX_HTTP_LC_HEADER_LEN];$/;"	m	struct:ngx_http_request_s
 lowcase_index	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_uint_t                        lowcase_index;$/;"	m	struct:ngx_http_request_s
 lowcase_key	c/nginx-0.6.31/src/core/ngx_hash.h	/^    u_char           *lowcase_key;$/;"	m	struct:__anon58
-lvi	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_int_t lvi;$/;"	m	struct:__anon255	file:
+lvi	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_int_t lvi;$/;"	m	struct:__anon253	file:
 mail_state	c/nginx-0.6.31/src/mail/ngx_mail.h	/^    ngx_uint_t              mail_state;$/;"	m	struct:__anon227
 main	c/nginx-0.6.31/src/core/nginx.c	/^main(int argc, char *const *argv)$/;"	f
 main	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_http_request_t               *main;$/;"	m	struct:ngx_http_request_s
@@ -2113,11 +2164,8 @@ max_waiting	c/nginx-0.6.31/src/http/ngx_http_busy_lock.h	/^    int              
 max_write	c/nginx-0.6.31/src/event/modules/ngx_select_module.c	/^static ngx_uint_t     max_write;$/;"	v	file:
 mc_addrs	c/ngx_http_rv_module/ngx_http_rv_module.c	/^  ngx_array_t                  *mc_addrs;$/;"	m	struct:__anon251	file:
 mc_end	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^static u_char mc_end[] = END;$/;"	v	file:
-mc_end	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^static u_char mc_end[] = END;$/;"	v	file:
 mc_res_s	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^typedef struct mc_res_s$/;"	s	file:
-mc_res_s	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^typedef struct mc_res_s$/;"	s	file:
 mc_res_t	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^} mc_res_t;$/;"	t	typeref:struct:mc_res_s	file:
-mc_res_t	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^} mc_res_t;$/;"	t	typeref:struct:mc_res_s	file:
 mck_index	c/ngx_http_rv_module/ngx_http_rv_module.c	/^  ngx_int_t                     mck_index;$/;"	m	struct:__anon251	file:
 mcs	c/ngx_http_rv_module/ngx_http_rv_module.c	/^  ngx_array_t                  *mcs;         \/* memcache_t  *\/$/;"	m	struct:__anon251	file:
 mcv_index	c/ngx_http_rv_module/ngx_http_rv_module.c	/^  ngx_int_t                     mcv_index;$/;"	m	struct:__anon251	file:
@@ -2236,7 +2284,7 @@ name	c/nginx-0.6.31/src/mail/ngx_mail.h	/^    ngx_str_t                   name;$
 name	c/nginx-0.6.31/src/os/unix/ngx_freebsd_init.c	/^    char        *name;$/;"	m	struct:__anon7	file:
 name	c/nginx-0.6.31/src/os/unix/ngx_process.h	/^    char               *name;$/;"	m	struct:__anon10
 name	c/nginx-0.6.31/src/os/unix/ngx_process.h	/^    char         *name;$/;"	m	struct:__anon11
-name	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    ngx_str_t                       name;$/;"	m	struct:__anon256	file:
+name	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    ngx_str_t                       name;$/;"	m	struct:__anon254	file:
 name_expire_queue	c/nginx-0.6.31/src/core/ngx_resolver.h	/^    ngx_queue_t               name_expire_queue;$/;"	m	struct:__anon38
 name_rbtree	c/nginx-0.6.31/src/core/ngx_resolver.h	/^    ngx_rbtree_t              name_rbtree;$/;"	m	struct:__anon38
 name_resend_queue	c/nginx-0.6.31/src/core/ngx_resolver.h	/^    ngx_queue_t               name_resend_queue;$/;"	m	struct:__anon38
@@ -2287,7 +2335,7 @@ next	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_http_postponed_request
 next	c/nginx-0.6.31/src/http/ngx_http_script.h	/^    uintptr_t                        next;$/;"	m	struct:__anon87
 next	c/nginx-0.6.31/src/http/ngx_http_script.h	/^    uintptr_t                        next;$/;"	m	struct:__anon92
 next	c/nginx-0.6.31/src/http/ngx_http_upstream_round_robin.h	/^    ngx_http_upstream_rr_peers_t   *next;$/;"	m	struct:ngx_http_upstream_rr_peers_s
-next_tok	c/ngx_util/ngx_util.h	20;"	d
+next_tok	c/ngx_util/ngx_util.h	19;"	d
 next_upstream	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_uint_t                      next_upstream;$/;"	m	struct:__anon114
 nfree	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_int_t                         nfree;$/;"	m	struct:__anon78
 nginx	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^package nginx;$/;"	p
@@ -2754,7 +2802,6 @@ ngx_get_conf	c/nginx-0.6.31/src/core/ngx_conf_file.h	225;"	d
 ngx_get_connection	c/nginx-0.6.31/src/core/ngx_connection.c	/^ngx_get_connection(ngx_socket_t s, ngx_log_t *log)$/;"	f
 ngx_get_cpu_affinity	c/nginx-0.6.31/src/core/nginx.c	/^ngx_get_cpu_affinity(ngx_uint_t n)$/;"	f
 ngx_get_free_chain	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^ngx_get_free_chain(ngx_http_request_t *r, ngx_http_upstream_t *u)$/;"	f	file:
-ngx_get_free_chain	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_get_free_chain(ngx_http_request_t *r, ngx_http_upstream_t *u)$/;"	f	file:
 ngx_getcwd	c/nginx-0.6.31/src/os/unix/ngx_files.h	107;"	d
 ngx_getcwd_n	c/nginx-0.6.31/src/os/unix/ngx_files.h	108;"	d
 ngx_getopt	c/nginx-0.6.31/src/core/nginx.c	/^ngx_getopt(ngx_cycle_t *cycle, int argc, char *const *argv)$/;"	f	file:
@@ -3239,7 +3286,7 @@ ngx_http_limit_zone_node_t	c/nginx-0.6.31/src/http/modules/ngx_http_limit_zone_m
 ngx_http_limit_zone_rbtree_insert_value	c/nginx-0.6.31/src/http/modules/ngx_http_limit_zone_module.c	/^ngx_http_limit_zone_rbtree_insert_value(ngx_rbtree_node_t *temp,$/;"	f	file:
 ngx_http_lingering_close_handler	c/nginx-0.6.31/src/http/ngx_http_request.c	/^ngx_http_lingering_close_handler(ngx_event_t *rev)$/;"	f	file:
 ngx_http_list_commands	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_http_list_commands[] = {$/;"	v	file:
-ngx_http_list_ctx_t	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_http_list_ctx_t;$/;"	t	typeref:struct:__anon254	file:
+ngx_http_list_ctx_t	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_http_list_ctx_t;$/;"	t	typeref:struct:__anon252	file:
 ngx_http_list_get_handler	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_http_list_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)$/;"	f	file:
 ngx_http_list_getitem_command	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_http_list_getitem_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)$/;"	f	file:
 ngx_http_list_module	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_http_list_module = {$/;"	v
@@ -3247,7 +3294,7 @@ ngx_http_list_module_ctx	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_htt
 ngx_http_list_set_handler	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_http_list_set_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)$/;"	f	file:
 ngx_http_listen_conf_t	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^} ngx_http_listen_conf_t;$/;"	t	typeref:struct:__anon98
 ngx_http_listen_t	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^} ngx_http_listen_t;$/;"	t	typeref:struct:__anon99
-ngx_http_listitem_ctx_t	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_http_listitem_ctx_t;$/;"	t	typeref:struct:__anon255	file:
+ngx_http_listitem_ctx_t	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_http_listitem_ctx_t;$/;"	t	typeref:struct:__anon253	file:
 ngx_http_listitem_get_handler	c/ngx_http_list_module/ngx_http_list_module.c	/^ngx_http_listitem_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)$/;"	f	file:
 ngx_http_log_body_bytes_sent	c/nginx-0.6.31/src/http/modules/ngx_http_log_module.c	/^ngx_http_log_body_bytes_sent(ngx_http_request_t *r, u_char *buf,$/;"	f	file:
 ngx_http_log_bytes_sent	c/nginx-0.6.31/src/http/modules/ngx_http_log_module.c	/^ngx_http_log_bytes_sent(ngx_http_request_t *r, u_char *buf,$/;"	f	file:
@@ -3303,32 +3350,6 @@ ngx_http_map_module_ctx	c/nginx-0.6.31/src/http/modules/ngx_http_map_module.c	/^
 ngx_http_map_uri_to_path	c/nginx-0.6.31/src/http/ngx_http_core_module.c	/^ngx_http_map_uri_to_path(ngx_http_request_t *r, ngx_str_t *path,$/;"	f
 ngx_http_map_variable	c/nginx-0.6.31/src/http/modules/ngx_http_map_module.c	/^ngx_http_map_variable(ngx_http_request_t *r, ngx_http_variable_value_t *v,$/;"	f	file:
 ngx_http_max_module	c/nginx-0.6.31/src/http/ngx_http.c	/^ngx_uint_t   ngx_http_max_module;$/;"	v
-ngx_http_mcm_abort_request	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_abort_request(ngx_http_request_t *r)$/;"	f	file:
-ngx_http_mcm_add_suffix	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_add_suffix(ngx_http_mcm_ctx_t *ctx,$/;"	f	file:
-ngx_http_mcm_commands	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^static ngx_command_t ngx_http_mcm_commands[] =$/;"	v	file:
-ngx_http_mcm_create_loc_conf	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_create_loc_conf(ngx_conf_t *cf)$/;"	f	file:
-ngx_http_mcm_create_request	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_create_request(ngx_http_request_t *r)$/;"	f	file:
-ngx_http_mcm_ctx_t	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^} ngx_http_mcm_ctx_t;$/;"	t	typeref:struct:__anon253	file:
-ngx_http_mcm_filter	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_filter(void *data, ssize_t bytes)$/;"	f	file:
-ngx_http_mcm_filter_init	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_filter_init(void *data)$/;"	f	file:
-ngx_http_mcm_finalize_request	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_finalize_request(ngx_http_request_t *r, ngx_int_t rc)$/;"	f	file:
-ngx_http_mcm_get_ctx	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_get_ctx(ngx_http_request_t *r)$/;"	f	file:
-ngx_http_mcm_handler	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_handler(ngx_http_request_t *r)$/;"	f	file:
-ngx_http_mcm_key	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^static ngx_str_t ngx_http_mcm_key =$/;"	v	file:
-ngx_http_mcm_loc_conf_t	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^} ngx_http_mcm_loc_conf_t;$/;"	t	typeref:struct:__anon252	file:
-ngx_http_mcm_merge_loc_conf	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)$/;"	f	file:
-ngx_http_mcm_module	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_module_t ngx_http_mcm_module =$/;"	v
-ngx_http_mcm_module_ctx	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^static ngx_http_module_t ngx_http_mcm_module_ctx =$/;"	v	file:
-ngx_http_mcm_next_upstream_masks	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^static ngx_conf_bitmask_t ngx_http_mcm_next_upstream_masks[] =$/;"	v	file:
-ngx_http_mcm_pass	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)$/;"	f	file:
-ngx_http_mcm_post_conf	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_post_conf(ngx_conf_t *cf)$/;"	f	file:
-ngx_http_mcm_pre_conf	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_pre_conf(ngx_conf_t *cf)$/;"	f	file:
-ngx_http_mcm_prefix	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^static ngx_str_t ngx_http_mcm_prefix =$/;"	v	file:
-ngx_http_mcm_process_header	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_process_header(ngx_http_request_t *r)$/;"	f	file:
-ngx_http_mcm_reinit_request	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_reinit_request(ngx_http_request_t *r)$/;"	f	file:
-ngx_http_mcm_suffix	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^static ngx_str_t ngx_http_mcm_suffix =$/;"	v	file:
-ngx_http_mcm_upstream_fail_timeout_unsupported	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_upstream_fail_timeout_unsupported(ngx_conf_t *cf,$/;"	f	file:
-ngx_http_mcm_upstream_max_fails_unsupported	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_http_mcm_upstream_max_fails_unsupported(ngx_conf_t *cf,$/;"	f	file:
 ngx_http_memcached_abort_request	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^ngx_http_memcached_abort_request(ngx_http_request_t *r)$/;"	f	file:
 ngx_http_memcached_add_suffix	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^ngx_http_memcached_add_suffix(ngx_http_memcached_ctx_t *ctx,$/;"	f	file:
 ngx_http_memcached_commands	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^static ngx_command_t ngx_http_memcached_commands[] =$/;"	v	file:
@@ -3811,9 +3832,9 @@ ngx_http_upstream_hash_crc32_short	c/nginx_upstream_hash-0.2/ngx_http_upstream_h
 ngx_http_upstream_hash_method	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^ngx_http_upstream_hash_method(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)$/;"	f	file:
 ngx_http_upstream_hash_module	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^ngx_module_t  ngx_http_upstream_hash_module = {$/;"	v
 ngx_http_upstream_hash_module_ctx	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^static ngx_http_module_t  ngx_http_upstream_hash_module_ctx = {$/;"	v	file:
-ngx_http_upstream_hash_peer_data_t	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^} ngx_http_upstream_hash_peer_data_t;$/;"	t	typeref:struct:__anon258	file:
-ngx_http_upstream_hash_peer_t	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^} ngx_http_upstream_hash_peer_t;$/;"	t	typeref:struct:__anon256	file:
-ngx_http_upstream_hash_peers_t	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^} ngx_http_upstream_hash_peers_t;$/;"	t	typeref:struct:__anon257	file:
+ngx_http_upstream_hash_peer_data_t	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^} ngx_http_upstream_hash_peer_data_t;$/;"	t	typeref:struct:__anon256	file:
+ngx_http_upstream_hash_peer_t	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^} ngx_http_upstream_hash_peer_t;$/;"	t	typeref:struct:__anon254	file:
+ngx_http_upstream_hash_peers_t	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^} ngx_http_upstream_hash_peers_t;$/;"	t	typeref:struct:__anon255	file:
 ngx_http_upstream_header_t	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^} ngx_http_upstream_header_t;$/;"	t	typeref:struct:__anon115
 ngx_http_upstream_header_variable	c/nginx-0.6.31/src/http/ngx_http_upstream.c	/^ngx_http_upstream_header_variable(ngx_http_request_t *r,$/;"	f
 ngx_http_upstream_headers_in	c/nginx-0.6.31/src/http/ngx_http_upstream.c	/^ngx_http_upstream_header_t  ngx_http_upstream_headers_in[] = {$/;"	v
@@ -4291,6 +4312,7 @@ ngx_memzero	c/nginx-0.6.31/src/core/ngx_string.h	63;"	d
 ngx_methods_names	c/nginx-0.6.31/src/http/ngx_http_core_module.c	/^static ngx_http_method_name_t  ngx_methods_names[] = {$/;"	v	file:
 ngx_module_s	c/nginx-0.6.31/src/core/ngx_conf_file.h	/^struct ngx_module_s {$/;"	s
 ngx_module_t	c/nginx-0.6.31/src/core/ngx_core.h	/^typedef struct ngx_module_s      ngx_module_t;$/;"	t	typeref:struct:ngx_module_s
+ngx_modules	c/nginx-0.6.31/objs/ngx_modules.c	/^ngx_module_t *ngx_modules[] = {$/;"	v
 ngx_msec_int_t	c/nginx-0.6.31/src/os/unix/ngx_time.h	/^typedef ngx_rbtree_key_int_t  ngx_msec_int_t;$/;"	t
 ngx_msec_t	c/nginx-0.6.31/src/os/unix/ngx_time.h	/^typedef ngx_rbtree_key_t      ngx_msec_t;$/;"	t
 ngx_msleep	c/nginx-0.6.31/src/os/unix/ngx_time.h	60;"	d
@@ -4382,7 +4404,6 @@ ngx_pagesize	c/nginx-0.6.31/src/os/unix/ngx_alloc.c	/^ngx_uint_t  ngx_pagesize;$
 ngx_pagesize_shift	c/nginx-0.6.31/src/os/unix/ngx_alloc.c	/^ngx_uint_t  ngx_pagesize_shift;$/;"	v
 ngx_palloc	c/nginx-0.6.31/src/core/ngx_palloc.c	/^ngx_palloc(ngx_pool_t *pool, size_t size)$/;"	f
 ngx_parse_mc_response	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^ngx_parse_mc_response(ngx_buf_t *b, mc_res_t *t)$/;"	f	file:
-ngx_parse_mc_response	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^ngx_parse_mc_response(ngx_buf_t *b, mc_res_t *t)$/;"	f	file:
 ngx_parse_offset	c/nginx-0.6.31/src/core/ngx_parse.c	/^ngx_parse_offset(ngx_str_t *line)$/;"	f
 ngx_parse_size	c/nginx-0.6.31/src/core/ngx_parse.c	/^ngx_parse_size(ngx_str_t *line)$/;"	f
 ngx_parse_time	c/nginx-0.6.31/src/core/ngx_parse.c	/^ngx_parse_time(ngx_str_t *line, ngx_uint_t sec)$/;"	f
@@ -4938,7 +4959,7 @@ num	c/nginx-0.6.31/src/core/ngx_buf.h	/^    ngx_int_t    num;$/;"	m	struct:__ano
 num	c/nginx-0.6.31/src/event/ngx_event_pipe.h	/^    \/* STUB *\/ int     num;$/;"	m	struct:ngx_event_pipe_s
 number	c/nginx-0.6.31/src/core/ngx_connection.h	/^    ngx_atomic_uint_t   number;$/;"	m	struct:ngx_connection_s
 number	c/nginx-0.6.31/src/http/ngx_http_upstream_round_robin.h	/^    ngx_uint_t                      number;$/;"	m	struct:ngx_http_upstream_rr_peers_s
-number	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    ngx_uint_t                        number;$/;"	m	struct:__anon257	file:
+number	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    ngx_uint_t                        number;$/;"	m	struct:__anon255	file:
 off	c/nginx-0.6.31/src/http/modules/ngx_http_log_module.c	/^    ngx_uint_t                  off;        \/* unsigned  off:1 *\/$/;"	m	struct:__anon199	file:
 offset	c/nginx-0.6.31/src/core/ngx_conf_file.h	/^    ngx_uint_t            offset;$/;"	m	struct:ngx_command_s
 offset	c/nginx-0.6.31/src/core/ngx_file.h	/^    off_t               offset;$/;"	m	struct:__anon40
@@ -5042,9 +5063,9 @@ peer	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_str_t                
 peer	c/nginx-0.6.31/src/http/ngx_http_upstream_round_robin.h	/^    ngx_http_upstream_rr_peer_t     peer[1];$/;"	m	struct:ngx_http_upstream_rr_peers_s
 peer	c/nginx-0.6.31/src/mail/ngx_mail_auth_http_module.c	/^    ngx_peer_addr_t                *peer;$/;"	m	struct:__anon211	file:
 peer	c/nginx-0.6.31/src/mail/ngx_mail_auth_http_module.c	/^    ngx_peer_connection_t           peer;$/;"	m	struct:ngx_mail_auth_http_ctx_s	file:
-peer	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    ngx_http_upstream_hash_peer_t     peer[1];$/;"	m	struct:__anon257	file:
+peer	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    ngx_http_upstream_hash_peer_t     peer[1];$/;"	m	struct:__anon255	file:
 peers	c/nginx-0.6.31/src/http/ngx_http_upstream_round_robin.h	/^    ngx_http_upstream_rr_peers_t   *peers;$/;"	m	struct:__anon71
-peers	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    ngx_http_upstream_hash_peers_t   *peers;$/;"	m	struct:__anon258	file:
+peers	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    ngx_http_upstream_hash_peers_t   *peers;$/;"	m	struct:__anon256	file:
 pending_eof	c/nginx-0.6.31/src/event/ngx_event.h	/^    unsigned         pending_eof:1;$/;"	m	struct:ngx_event_s
 perl	c/nginx-0.6.31/src/http/modules/perl/ngx_http_perl_module.c	/^    PerlInterpreter   *perl;$/;"	m	struct:__anon118	file:
 perl	c/nginx-0.6.31/src/http/modules/perl/ngx_http_perl_module.c	/^    PerlInterpreter   *perl;$/;"	m	struct:__anon121	file:
@@ -5145,14 +5166,12 @@ posted_timedout	c/nginx-0.6.31/src/event/ngx_event.h	/^    unsigned         post
 postpone_output	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^    size_t        postpone_output;         \/* postpone_output *\/$/;"	m	struct:ngx_http_core_loc_conf_s
 postponed	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_http_postponed_request_t     *postponed;$/;"	m	struct:ngx_http_request_s
 pre	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_str_t pre;$/;"	m	struct:__anon180	file:
-pre	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_str_t pre;$/;"	m	struct:__anon253	file:
 pre_tree_handler	c/nginx-0.6.31/src/core/ngx_file.h	/^    ngx_tree_handler_pt        pre_tree_handler;$/;"	m	struct:ngx_tree_ctx_s
 preallocated	c/nginx-0.6.31/src/http/modules/ngx_http_gzip_filter_module.c	/^    void                *preallocated;$/;"	m	struct:__anon150	file:
 preconfiguration	c/nginx-0.6.31/src/http/ngx_http_config.h	/^    ngx_int_t   (*preconfiguration)(ngx_conf_t *cf);$/;"	m	struct:__anon96
 prefer_server_ciphers	c/nginx-0.6.31/src/http/modules/ngx_http_ssl_module.h	/^    ngx_flag_t                      prefer_server_ciphers;$/;"	m	struct:__anon152
 prefer_server_ciphers	c/nginx-0.6.31/src/mail/ngx_mail_ssl_module.h	/^    ngx_flag_t       prefer_server_ciphers;$/;"	m	struct:__anon230
 prefix_index	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_int_t prefix_index;$/;"	m	struct:__anon179	file:
-prefix_index	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_int_t prefix_index;$/;"	m	struct:__anon252	file:
 preread_bufs	c/nginx-0.6.31/src/event/ngx_event_pipe.h	/^    ngx_chain_t       *preread_bufs;$/;"	m	struct:ngx_event_pipe_s
 preread_size	c/nginx-0.6.31/src/event/ngx_event_pipe.h	/^    size_t             preread_size;$/;"	m	struct:ngx_event_pipe_s
 prev	c/nginx-0.6.31/src/core/ngx_queue.h	/^    ngx_queue_t  *prev;$/;"	m	struct:ngx_queue_s
@@ -5191,7 +5210,7 @@ quoted	c/nginx-0.6.31/src/mail/ngx_mail.h	/^    unsigned                quoted:1
 quoted_uri	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    unsigned                          quoted_uri:1;$/;"	m	struct:ngx_http_request_s
 range	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_table_elt_t                  *range;$/;"	m	struct:__anon75
 ranges	c/nginx-0.6.31/src/http/modules/ngx_http_range_filter_module.c	/^    ngx_array_t  ranges;$/;"	m	struct:__anon186	file:
-raw	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_str_t raw;$/;"	m	struct:__anon254	file:
+raw	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_str_t raw;$/;"	m	struct:__anon252	file:
 rbtree	c/nginx-0.6.31/src/core/ngx_open_file_cache.h	/^    ngx_rbtree_t             rbtree;$/;"	m	struct:__anon27
 rbtree	c/nginx-0.6.31/src/http/modules/ngx_http_limit_zone_module.c	/^    ngx_rbtree_t       *rbtree;$/;"	m	struct:__anon155	file:
 rcvbuf	c/nginx-0.6.31/src/core/ngx_connection.h	/^    int                 rcvbuf;$/;"	m	struct:ngx_listening_s
@@ -5254,7 +5273,6 @@ request	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_http_request_t     
 request	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_http_request_t               *request;$/;"	m	struct:ngx_http_postponed_request_s
 request	c/nginx-0.6.31/src/http/ngx_http_script.h	/^    ngx_http_request_t         *request;$/;"	m	struct:__anon81
 request	c/nginx-0.6.31/src/mail/ngx_mail_auth_http_module.c	/^    ngx_buf_t                      *request;$/;"	m	struct:ngx_mail_auth_http_ctx_s	file:
-request	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_http_request_t *request;$/;"	m	struct:__anon253	file:
 request_body	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_http_request_body_t          *request_body;$/;"	m	struct:ngx_http_request_s
 request_body_file_group_access	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    unsigned                          request_body_file_group_access:1;$/;"	m	struct:ngx_http_request_s
 request_body_file_log_level	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    unsigned                          request_body_file_log_level:3;$/;"	m	struct:ngx_http_request_s
@@ -5294,7 +5312,6 @@ response_msec	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_uint_t      
 response_sec	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    time_t                          response_sec;$/;"	m	struct:__anon110
 rest	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  size_t rest;$/;"	m	struct:__anon180	file:
 rest	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    off_t                             rest;$/;"	m	struct:__anon77
-rest	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  size_t rest;$/;"	m	struct:__anon253	file:
 retries	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_uint_t                      retries;$/;"	m	struct:ngx_http_upstream_srv_conf_s
 rewrite_redirect	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_int_t                     (*rewrite_redirect)(ngx_http_request_t *r,$/;"	m	struct:ngx_http_upstream_s
 rflush	c/nginx-0.6.31/src/http/modules/perl/nginx.pm	/^sub rflush {$/;"	s
@@ -5465,14 +5482,14 @@ sockaddr	c/nginx-0.6.31/src/core/ngx_inet.h	/^    struct sockaddr  *sockaddr;$/;
 sockaddr	c/nginx-0.6.31/src/core/ngx_resolver.h	/^    struct sockaddr          *sockaddr;$/;"	m	struct:__anon35	typeref:struct:__anon35::sockaddr
 sockaddr	c/nginx-0.6.31/src/event/ngx_event_connect.h	/^    struct sockaddr                 *sockaddr;$/;"	m	struct:ngx_peer_connection_s	typeref:struct:ngx_peer_connection_s::sockaddr
 sockaddr	c/nginx-0.6.31/src/http/ngx_http_upstream_round_robin.h	/^    struct sockaddr                *sockaddr;$/;"	m	struct:__anon70	typeref:struct:__anon70::sockaddr
-sockaddr	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    struct sockaddr                *sockaddr;$/;"	m	struct:__anon256	typeref:struct:__anon256::sockaddr	file:
+sockaddr	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    struct sockaddr                *sockaddr;$/;"	m	struct:__anon254	typeref:struct:__anon254::sockaddr	file:
 socklen	c/nginx-0.6.31/src/core/ngx_connection.h	/^    socklen_t           socklen;    \/* size of sockaddr *\/$/;"	m	struct:ngx_listening_s
 socklen	c/nginx-0.6.31/src/core/ngx_connection.h	/^    socklen_t           socklen;$/;"	m	struct:ngx_connection_s
 socklen	c/nginx-0.6.31/src/core/ngx_inet.h	/^    socklen_t         socklen;$/;"	m	struct:__anon61
 socklen	c/nginx-0.6.31/src/core/ngx_resolver.h	/^    socklen_t                 socklen;$/;"	m	struct:__anon35
 socklen	c/nginx-0.6.31/src/event/ngx_event_connect.h	/^    socklen_t                        socklen;$/;"	m	struct:ngx_peer_connection_s
 socklen	c/nginx-0.6.31/src/http/ngx_http_upstream_round_robin.h	/^    socklen_t                       socklen;$/;"	m	struct:__anon70
-socklen	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    socklen_t                       socklen;$/;"	m	struct:__anon256	file:
+socklen	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    socklen_t                       socklen;$/;"	m	struct:__anon254	file:
 source	c/nginx-0.6.31/src/http/ngx_http_script.h	/^    ngx_str_t                  *source;$/;"	m	struct:__anon82
 source_charset	c/nginx-0.6.31/src/http/modules/ngx_http_charset_filter_module.c	/^    ngx_int_t                   source_charset;$/;"	m	struct:__anon174	file:
 sp	c/nginx-0.6.31/src/http/ngx_http_script.h	/^    ngx_http_variable_value_t  *sp;$/;"	m	struct:__anon81
@@ -5574,8 +5591,6 @@ store	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    unsigned                
 store_access	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_uint_t                      store_access;$/;"	m	struct:__anon114
 store_lengths	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_array_t                    *store_lengths;$/;"	m	struct:__anon114
 store_values	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_array_t                    *store_values;$/;"	m	struct:__anon114
-str_to_array	c/ngx_util/ngx_util.h	/^str_to_array(ngx_pool_t *p, u_char *data, ngx_int_t len, u_char del,$/;"	f
-str_to_array_0	c/ngx_util/ngx_util.h	/^str_to_array_0(u_char *data, ngx_int_t len, u_char del, ngx_array_t **arr)$/;"	f
 stub	c/nginx-0.6.31/src/event/ngx_event_openssl.h	/^    void                       *stub;$/;"	m	struct:ngx_ssl_sess_id_s
 sub	c/nginx-0.6.31/src/http/modules/ngx_http_sub_filter_module.c	/^    ngx_str_t      sub;$/;"	m	struct:__anon125	file:
 sub	c/nginx-0.6.31/src/http/modules/ngx_http_sub_filter_module.c	/^    ngx_str_t      sub;$/;"	m	struct:__anon127	file:
@@ -5588,7 +5603,6 @@ sub_values	c/nginx-0.6.31/src/http/modules/ngx_http_sub_filter_module.c	/^    ng
 subrequest_in_memory	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    unsigned                          subrequest_in_memory:1;$/;"	m	struct:ngx_http_request_s
 subrequests	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    unsigned                          subrequests:8;$/;"	m	struct:ngx_http_request_s
 suffix_index	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_int_t suffix_index;$/;"	m	struct:__anon179	file:
-suffix_index	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_int_t suffix_index;$/;"	m	struct:__anon252	file:
 sv	c/nginx-0.6.31/src/http/modules/perl/ngx_http_perl_module.c	/^    SV                *sv;$/;"	m	struct:__anon121	file:
 sync	c/nginx-0.6.31/src/core/ngx_buf.h	/^    unsigned         sync:1;$/;"	m	struct:ngx_buf_s
 sys_offset	c/nginx-0.6.31/src/core/ngx_file.h	/^    off_t               sys_offset;$/;"	m	struct:ngx_file_s
@@ -5652,7 +5666,6 @@ timer_resolution	c/nginx-0.6.31/src/core/ngx_cycle.h	/^     ngx_msec_t          
 timer_set	c/nginx-0.6.31/src/event/ngx_event.h	/^    unsigned         timer_set:1;$/;"	m	struct:ngx_event_s
 timer_settime	c/nginx-0.6.31/src/event/modules/ngx_eventport_module.c	/^int timer_settime(timer_t timerid, int flags, const struct itimerspec *value,$/;"	f
 times	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_uint_t times;$/;"	m	struct:__anon180	file:
-times	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_uint_t times;$/;"	m	struct:__anon253	file:
 timezonevar	c/nginx-0.6.31/src/os/unix/ngx_posix_config.h	23;"	d
 title	c/nginx-0.6.31/src/http/modules/ngx_http_autoindex_module.c	/^static u_char title[] =$/;"	v	file:
 to_utf8	c/nginx-0.6.31/src/http/modules/ngx_http_charset_filter_module.c	/^    unsigned                    to_utf8:1;$/;"	m	struct:__anon175	file:
@@ -5660,7 +5673,7 @@ to_write	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_chain_t           
 transfer_encoding	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_table_elt_t                  *transfer_encoding;$/;"	m	struct:__anon75
 tree	c/nginx-0.6.31/src/http/modules/ngx_http_geo_module.c	/^    ngx_radix_tree_t  *tree;$/;"	m	struct:__anon124	file:
 tried	c/nginx-0.6.31/src/http/ngx_http_upstream_round_robin.h	/^    uintptr_t                      *tried;$/;"	m	struct:__anon71
-tried	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    uintptr_t                         tried[1];$/;"	m	struct:__anon258	file:
+tried	c/nginx_upstream_hash-0.2/ngx_http_upstream_hash_module.c	/^    uintptr_t                         tried[1];$/;"	m	struct:__anon256	file:
 tries	c/nginx-0.6.31/src/event/ngx_event_connect.h	/^    ngx_uint_t                       tries;$/;"	m	struct:ngx_peer_connection_s
 tries	c/nginx-0.6.31/src/http/modules/ngx_http_upstream_ip_hash_module.c	/^    u_char                             tries;$/;"	m	struct:__anon151	file:
 true	c/nginx-0.6.31/src/os/unix/ngx_atomic.h	29;"	d
@@ -5712,7 +5725,6 @@ upstream	c/nginx-0.6.31/src/http/modules/ngx_http_proxy_module.c	/^    ngx_http_
 upstream	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_http_upstream_t              *upstream;$/;"	m	struct:ngx_http_request_s
 upstream	c/nginx-0.6.31/src/http/ngx_http_upstream.h	/^    ngx_http_upstream_srv_conf_t   *upstream;$/;"	m	struct:__anon114
 upstream	c/nginx-0.6.31/src/mail/ngx_mail.h	/^    ngx_peer_connection_t   upstream;$/;"	m	struct:__anon226
-upstream	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_http_upstream_conf_t upstream;$/;"	m	struct:__anon252	file:
 upstream_blocked	c/nginx-0.6.31/src/event/ngx_event_pipe.h	/^    unsigned           upstream_blocked:1;$/;"	m	struct:ngx_event_pipe_s
 upstream_done	c/nginx-0.6.31/src/event/ngx_event_pipe.h	/^    unsigned           upstream_done:1;$/;"	m	struct:ngx_event_pipe_s
 upstream_eof	c/nginx-0.6.31/src/event/ngx_event_pipe.h	/^    unsigned           upstream_eof:1;$/;"	m	struct:ngx_event_pipe_s
@@ -5756,7 +5768,6 @@ utf8	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    unsigned                  
 utf_len	c/nginx-0.6.31/src/http/modules/ngx_http_autoindex_module.c	/^    size_t         utf_len;$/;"	m	struct:__anon166	file:
 v0	c/ngx_http_rv_module/ngx_http_rv_module.c	/^  ngx_int_t                     v0;$/;"	m	struct:__anon251	file:
 val	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_str_t val;$/;"	m	struct:mc_res_s	file:
-val	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_str_t val;$/;"	m	struct:mc_res_s	file:
 valid	c/nginx-0.6.31/src/core/ngx_open_file_cache.h	/^    time_t                   valid;$/;"	m	struct:__anon26
 valid	c/nginx-0.6.31/src/core/ngx_resolver.h	/^    time_t                    valid;$/;"	m	struct:__anon36
 valid	c/nginx-0.6.31/src/core/ngx_resolver.h	/^    time_t                    valid;$/;"	m	struct:__anon38
@@ -5780,13 +5791,10 @@ value	c/nginx-0.6.31/src/http/ngx_http_script.h	/^    uintptr_t                 
 value	c/nginx-0.6.31/src/os/unix/ngx_freebsd_init.c	/^    void        *value;$/;"	m	struct:__anon7	file:
 value_buf	c/nginx-0.6.31/src/http/modules/ngx_http_ssi_filter_module.h	/^    void                     *value_buf;$/;"	m	struct:__anon162
 value_get_handler	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^value_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v,$/;"	f	file:
-value_get_handler	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^value_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v,$/;"	f	file:
 value_index	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_int_t value_index;$/;"	m	struct:__anon179	file:
-value_index	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_int_t value_index;$/;"	m	struct:__anon252	file:
 value_len	c/nginx-0.6.31/src/http/modules/ngx_http_ssi_filter_module.c	/^    size_t        value_len;$/;"	m	struct:__anon157	file:
 value_len	c/nginx-0.6.31/src/http/modules/ngx_http_ssi_filter_module.h	/^    size_t                    value_len;$/;"	m	struct:__anon162
 value_set_handler	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^value_set_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v,$/;"	f	file:
-value_set_handler	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^value_set_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v,$/;"	f	file:
 values	c/nginx-0.6.31/src/http/modules/ngx_http_geo_module.c	/^    ngx_array_t        values;$/;"	m	struct:__anon124	file:
 values	c/nginx-0.6.31/src/http/modules/ngx_http_headers_filter_module.c	/^    ngx_array_t             *values;$/;"	m	struct:ngx_http_header_val_s	file:
 values	c/nginx-0.6.31/src/http/modules/ngx_http_index_module.c	/^    ngx_array_t             *values;$/;"	m	struct:__anon194	file:
@@ -5813,12 +5821,11 @@ version	c/nginx-0.6.31/src/core/ngx_conf_file.h	/^    ngx_uint_t            vers
 version	c/nginx-0.6.31/src/http/modules/ngx_http_browser_module.c	/^    ngx_uint_t                  version;$/;"	m	struct:__anon182	file:
 version	c/nginx-0.6.31/src/http/modules/ngx_http_fastcgi_module.c	/^    u_char  version;$/;"	m	struct:__anon138	file:
 version	c/nginx-0.6.31/src/http/modules/ngx_http_fastcgi_module.c	/^    u_char  version;$/;"	m	struct:__anon140	file:
-vi	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_int_t vi;$/;"	m	struct:__anon255	file:
+vi	c/ngx_http_list_module/ngx_http_list_module.c	/^  ngx_int_t vi;$/;"	m	struct:__anon253	file:
 via	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_table_elt_t                  *via;$/;"	m	struct:__anon75
 virtual_names	c/nginx-0.6.31/src/http/ngx_http_core_module.h	/^    ngx_http_virtual_names_t  *virtual_names;$/;"	m	struct:__anon105
 virtual_names	c/nginx-0.6.31/src/http/ngx_http_request.h	/^    ngx_http_virtual_names_t         *virtual_names;$/;"	m	struct:ngx_http_request_s
 vlen	c/nginx-0.6.31/src/http/modules/ngx_http_memcached_module.c	/^  ngx_str_t vlen;$/;"	m	struct:mc_res_s	file:
-vlen	c/ngx_http_memcached_more_module/ngx_http_memcached_more_module.c	/^  ngx_str_t vlen;$/;"	m	struct:mc_res_s	file:
 wait	c/nginx-0.6.31/src/http/modules/ngx_http_ssi_filter_module.h	/^    ngx_http_request_t       *wait;$/;"	m	struct:__anon162
 waiting	c/nginx-0.6.31/src/core/ngx_resolver.h	/^    ngx_resolver_ctx_t       *waiting;$/;"	m	struct:__anon36
 waiting	c/nginx-0.6.31/src/event/ngx_event_busy_lock.h	/^    ngx_uint_t                  waiting;$/;"	m	struct:__anon242
