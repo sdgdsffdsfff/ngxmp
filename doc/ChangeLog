@@ -1,12 +1,18 @@
 Version 0.1.4
+	08-11-10 	drdr.xp	<drdr.xp@gmail.com>
+		* Added		: remote variable : reconnect on failure.
+
 	08-09-18	drdr.xp	<drdr.xp@gmail.com>
 		* Fixed		: remote variable : fix libmemcache crc32 problem
 		* Fixed		: list : random list item access lost the first char
+
 	08-09-17	drdr.xp	<drdr.xp@gmail.com>
 		* Added		: list : operate string as list.
+
 	08-09-12	drdr.xp	<drdr.xp@gmail.com>
 		* Added		: inst script : add debug/release build option, switch it in 'conf'
 		* Added		: remote variable : default value on empty-key.
+
 	08-09-11	drdr.xp	<drdr.xp@gmail.com>
 		* Added		: remote variable duplication detect.
 		* Added		: remote variable supports incr, decr, delete now

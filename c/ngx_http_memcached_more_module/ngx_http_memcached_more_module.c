@@ -1,7 +1,7 @@
-/*
- * Copyright (C) Igor Sysoev
- */
 
+/** 
+ * TODO segment fault on without setting prefix
+ */
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_event.h>

@@ -27,9 +27,9 @@
 
 #define IS_FATAL 1
 #define IS_ERROR 1
-#define IS_DEBUG 1
-#define IS_STEP  1
-#define IS_TRACE 1
+/* #define IS_DEBUG 1 */
+/* #define IS_STEP  1 */
+/* #define IS_TRACE 1 */
 
 #include  "debug.h"
 #include  "ngx_util.h"
@@ -53,19 +53,24 @@ ngx_http_rv_main_conf_t;
 
 
 typedef struct {
-  ngx_str_t                     us_name;     /* upstream name  */
+  ngx_str_t                     us_name;        /* upstream name  */
 
-  ngx_int_t                     us_index;    /* upstream index */
+  ngx_int_t                     us_index;       /* upstream index */
   ngx_http_upstream_srv_conf_t *us;
 
   ngx_array_t                  *mc_addrs;
-  ngx_array_t                  *mcs;         /* memcache_t  */
+  ngx_array_t                  *mcs;            /* memcache_t  */
 
   ngx_int_t                     mck_index;
   ngx_int_t                     mcv_index;
 
-  ngx_int_t                     op;
-  ngx_int_t                     v0;
+  ngx_int_t                     hashkey_index;  /* which varaible to use as hash string */
+
+  void                         *hash_method;    /* not used yet for now */
+  
+
+  ngx_int_t                     op;             /* operation type [set|incr|decr] */
+  ngx_int_t                     v0;             /* default value for incr/decr */
 }
 ngx_http_rv_vctx_t;
 
@@ -74,8 +79,9 @@ static void      *ngx_http_create_main_conf     (ngx_conf_t *cf                 
 static char      *ngx_http_init_main_conf       (ngx_conf_t *cf, void *conf                                               );
 static ngx_int_t  ngx_http_rv_init_proc         (ngx_cycle_t *cycle                                                       );
 static void       ngx_http_rv_exit              (ngx_cycle_t *cycle                                                       );
- 
+
 static char      *ngx_http_rv_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf                           );
+static char      *ngx_http_rv_hash_key_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf                           );
 static ngx_int_t  ngx_http_rv_post_conf         (ngx_conf_t *cf                                                           );
  
 static ngx_int_t  ngx_http_rv_init_var_mc       (ngx_conf_t *cf, ngx_http_variable_t *v                                   );
@@ -99,6 +105,11 @@ ngx_http_rv_commands[] = {
   { ngx_string("remote_var"),
     NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_2MORE,
     ngx_http_rv_remote_var_command,
+    NGX_HTTP_LOC_CONF_OFFSET, 0, NULL },
+
+  { ngx_string("rv_hash_key"),
+    NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_TAKE2,
+    ngx_http_rv_hash_key_command,
     NGX_HTTP_LOC_CONF_OFFSET, 0, NULL },
 
   ngx_null_command
@@ -163,7 +174,7 @@ ngx_http_rv_post_conf(ngx_conf_t *cf)
 
     v = rvi;
 
-    logc("initialize remote variable [%V] ", &v->name);
+    /* logc("initialize remote variable [%V] ", &v->name); */
 
     rc = ngx_http_rv_init_var_mc(cf, v);
     if (NGX_OK != rc){
@@ -210,7 +221,7 @@ ngx_http_rv_init_var_mc(ngx_conf_t *cf, ngx_http_variable_t *v)
     return NGX_ERROR;
   }
 
-  logc("init mc address of [%V] which needs upstream [%V], v.ctx:[%p]", &v->name, vus, ctx);
+  /* logc("init mc address of [%V] which needs upstream [%V], v.ctx:[%p]", &v->name, vus, ctx); */
 
 
   usmcf = (ngx_http_upstream_main_conf_t*)
@@ -219,7 +230,7 @@ ngx_http_rv_init_var_mc(ngx_conf_t *cf, ngx_http_variable_t *v)
   usscf = usmcf->upstreams.elts;
   usn   = usmcf->upstreams.nelts;
 
-  logc("upstream number:%d", usn);
+  /* logc("upstream number:%d", usn); */
 
   for (i= 0; i < usn; ++i){
     ucf = usscf[i];
@@ -229,7 +240,7 @@ ngx_http_rv_init_var_mc(ngx_conf_t *cf, ngx_http_variable_t *v)
     if (vus->len != usname->len 
       || 0 != ngx_strncmp(vus->data, usname->data, vus->len)) { continue; }
 
-    logc("RV[%V] uses upstream : [%V]", &v->name, usname);
+    /* logc("RV[%V] uses upstream : [%V]", &v->name, usname); */
 
     srvn = ucf->servers->nelts;
     srv  = ucf->servers->elts;
@@ -253,7 +264,7 @@ ngx_http_rv_init_var_mc(ngx_conf_t *cf, ngx_http_variable_t *v)
 
       *mca = *srv_addr;
 
-      logc("    added server addr:port[%V]", srv_addr);
+      /* logc("    added server addr:port[%V]", srv_addr); */
     }
 
     return NGX_OK;
@@ -357,10 +368,39 @@ ngx_http_rv_connet_mc(ngx_cycle_t *cycle, ngx_array_t **mcs, ngx_array_t *addrs 
 get_mc(ngx_array_t *mcs, u_char *key, ngx_int_t len)
 {
   ngx_uint_t hash = ngx_crc32_long(key, len);
-  /* fprintf(stderr, "hash:%x\n", hash); */
   memcache_t **mc = mcs->elts;
-
   return mc[hash % mcs->nelts];
+}
+
+  static int
+reconnect(ngx_array_t *mcs, u_char *key, ngx_int_t len)
+{
+
+  char buf[256];
+  int l = 0;
+
+  int rc = 0;
+
+  ngx_uint_t hash = ngx_crc32_long(key, len);
+  memcache_t **mc = mcs->elts;
+  
+  mc = &mc[hash % mcs->nelts];
+  struct memcache_server *mcsvr = *(*mc)->servers;
+  
+
+
+
+  l = sprintf(buf, "%s:%s", mcsvr->hostname, mcsvr->port);
+  buf[l] = 0;
+
+  mc_free(*mc);
+
+  *mc = mc_new();
+  rc = mc_server_add4(*mc, (char*)buf);
+
+  DEBUG("reconnect:%s, rc=%d", buf, rc);
+
+  return 0;
 }
 
 
@@ -390,6 +430,7 @@ ngx_http_rv_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uin
 
   ngx_http_rv_main_conf_t   *mcf;
   ngx_http_variable_value_t *mckvv;
+  ngx_http_variable_value_t *mchvv;
 
   memcache_t *mc;
 
@@ -412,12 +453,20 @@ ngx_http_rv_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uin
     return NGX_ERROR;
   }
 
+  logr("the hashkey_index:%d", ctx->hashkey_index);
+
+  mchvv = ngx_http_get_flushed_variable(r, ctx->hashkey_index);
+  if (mchvv->not_found || !mchvv->valid) {
+    return NGX_ERROR;
+  }
+
   ngx_log_debug(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0,
     "mc key of remote variable:%v", mckvv);
 
-  mc = get_mc(ctx->mcs, mckvv->data, mckvv->len);
+  mc = get_mc(ctx->mcs, mchvv->data, mchvv->len);
   mcv = mc_aget(mc, (char*)mckvv->data, mckvv->len);
   if (NULL == mcv){
+      reconnect(ctx->mcs, mckvv->data, mckvv->len);
     logr("get remote failed");
     *v = ngx_http_variable_null_value;
 
@@ -456,6 +505,7 @@ ngx_http_rv_set_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uin
   fSTEP;
 
   ngx_http_rv_main_conf_t   *mcf;
+  ngx_http_variable_value_t *mchvv; /* hash variable */
   ngx_http_variable_value_t *mckvv;
   ngx_http_variable_value_t *mcv_vv;
 
@@ -487,12 +537,17 @@ ngx_http_rv_set_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uin
     return;
   }
 
+  mchvv = ngx_http_get_flushed_variable(r, ctx->hashkey_index);
+  if (mchvv->not_found || !mchvv->valid) {
+    return;
+  }
+
   ngx_log_debug(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0, "mc key of remote variable:%v", mckvv);
   ngx_log_debug(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0, "value to set:%v", v);
 
   op=ctx->op;
 
-  mc = get_mc(ctx->mcs, mckvv->data, mckvv->len);
+  mc = get_mc(ctx->mcs, mchvv->data, mchvv->len);
 
   logr("got mc:%p", mc);
 
@@ -574,6 +629,7 @@ ngx_http_rv_set_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uin
 
       ngx_log_error(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "set remote var failed:rc=%d", rc);
 
+      reconnect(ctx->mcs, mckvv->data, mckvv->len);
       mcv_vv->data = NULL;
       mcv_vv->len = 0;
       mcv_vv->valid = 0;
@@ -588,6 +644,66 @@ ngx_http_rv_set_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uin
 
 }
 
+  static char *
+ngx_http_rv_hash_key_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+{
+  ngx_http_core_main_conf_t  *cmcf;
+  ngx_http_core_loc_conf_t   *clcf;
+  ngx_http_rv_main_conf_t    *mcf;
+  ngx_str_t                  *argvalues;
+  ngx_str_t                   rvname;
+  ngx_str_t                   hashname;
+
+  ngx_http_variable_t        *rv;
+  /* ngx_http_variable_t        *hash; */
+  char* res;
+
+  ngx_http_rv_vctx_t *ctx;
+
+
+  if (cf->args->nelts < 3){
+    return "arguments number must not be less than 3";
+  }
+
+  mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_rv_module);
+
+  cmcf  = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
+  clcf  = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
+
+  argvalues = cf->args->elts;
+
+
+  if (NULL != 
+    (res = ngx_http_get_var_name_str(&argvalues[1], &rvname))) {
+    return res;
+  }
+
+  if (NULL != 
+    (res = ngx_http_get_var_name_str(&argvalues[2], &hashname))) {
+    return res;
+  }
+
+  rv = ngx_http_add_variable(cf, &rvname, NGX_HTTP_VAR_CHANGEABLE);
+  if (NULL == rv) {
+    return "cant find remote variable";
+  }
+
+  ctx = (ngx_http_rv_vctx_t*)rv->data;
+  if (NULL == ctx) {
+    return "remote variable has no context object";
+  }
+
+  /* logc("hashname:%V", &hashname); */
+  ctx->hashkey_index = ngx_http_get_variable_index(cf, &hashname);
+  if (NGX_ERROR == ctx->hashkey_index) {
+    return "cant find hash key variable";
+  }
+
+  /* logc("key index:%d", ctx->mck_index); */
+  /* logc("hash index:%d", ctx->hashkey_index); */
+
+  return NGX_CONF_OK;
+}
   static char *
 ngx_http_rv_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
@@ -670,6 +786,7 @@ ngx_http_rv_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
   ctx->mck_index = ngx_http_get_variable_index(cf, &keyname);
   ctx->us_name = usname;
+  ctx->hashkey_index = ctx->mck_index;
   ctx->op = op;
   ctx->v0 = v0;
 
@@ -683,7 +800,7 @@ ngx_http_rv_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
   v->data = (uintptr_t)ctx;
 
 
-  logc("RV[%V] ctx:[%p]", &v->name, v->data);
+  /* logc("RV[%V] ctx:[%p]", &v->name, v->data); */
 
   ctx->mcv_index = vi;
 
@@ -711,7 +828,7 @@ ngx_http_create_main_conf (ngx_conf_t *cf)
     return NULL;
   }
 
-  logc("create main config done");
+  /* logc("create main config done"); */
   return mcf;
 }
 

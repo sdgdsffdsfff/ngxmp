@@ -143,7 +143,7 @@ ngx_http_vwrite_content_handler(ngx_http_request_t *r)
   ngx_http_variable_value_t  *vv;
 
   static ngx_chain_t out_chain;
-  static ngx_buf_t out_ctl;
+   ngx_buf_t *out_ctl;
 
   ngx_int_t rc;
 
@@ -170,13 +170,15 @@ ngx_http_vwrite_content_handler(ngx_http_request_t *r)
   r->headers_out.content_type.data = (u_char *) "text/html";
   r->headers_out.content_length_n = vv->len;
   r->headers_out.status = 200;
-  out_chain.buf    = &out_ctl;
+  out_ctl = ngx_palloc(r->pool, sizeof(ngx_buf_t));
+
+  out_chain.buf    = out_ctl;
   out_chain.next   = NULL;
-  memset(&out_ctl, 0, sizeof(ngx_buf_t));
-  out_ctl.pos      = vv->data;
-  out_ctl.last     = vv->data + vv->len;
-  out_ctl.memory   = 1;
-  out_ctl.last_buf = 1;
+  memset(out_ctl, 0, sizeof(ngx_buf_t));
+  out_ctl->pos      = vv->data;
+  out_ctl->last     = vv->data + vv->len;
+  out_ctl->memory   = 1;
+  out_ctl->last_buf = 1;
 
   ngx_http_send_header(r);
 

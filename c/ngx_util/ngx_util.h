@@ -218,6 +218,7 @@ array_join_x(
 
   if (0 >= step) step = 1;
 
+  n = arr->nelts;//chaimvy modified
   if (0 != n % step) return NGX_ERROR;
 
   if (NULL != dels) {
