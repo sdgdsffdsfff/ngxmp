@@ -221,6 +221,9 @@ array_join_x(
   n = arr->nelts;//chaimvy modified
   if (0 != n % step) return NGX_ERROR;
 
+	/*if dels is empty, should be NULL*/
+	if (dels->nelts == 0) dels = NULL;
+
   if (NULL != dels) {
     del = dels->elts;
     ndel = dels->nelts;
