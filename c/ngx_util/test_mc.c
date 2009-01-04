@@ -1,7 +1,7 @@
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_event.h>
-#include "mc_protocal.h"
+#include "mc_protocol.h"
 
 u_char _buf[4096];
 

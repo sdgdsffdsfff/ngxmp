@@ -4,29 +4,207 @@
 #ifndef __ngx_util__
 #	define __ngx_util__
 
+#include <uuid/uuid.h>
+#define UUID_LEN 37
+
+#define __return(s) (s)
+
+
+#ifndef min
+#       define min(x,y) ((x) < (y) ? (x) : (y))
+#endif
+#ifndef max
+#       define max(x,y) ((x) > (y) ? (x) : (y))
+#endif
+
+
+#define LOG_PREFIX ":::"
 /* request log */
-#	define logr(fmt ...) ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, ":::"fmt)
-#	define logre(fmt ...) ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, ":::"fmt)
+#define logr(fmt ...)  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, LOG_PREFIX fmt)
+#define logre(fmt ...) ngx_log_error(NGX_LOG_ERR, r->connection->log, 0, LOG_PREFIX fmt)
 
 /* conf log */
-#	define logc(fmt ...) ngx_conf_log_error(NGX_LOG_ERR, cf, 0, ":::"fmt)
-#	define logce(fmt ...) ngx_conf_log_error(NGX_LOG_ERR, cf, 0, ":::"fmt)
+#define logc(fmt ...)  ngx_conf_log_error(NGX_LOG_DEBUG, cf, 0, LOG_PREFIX fmt)
+#define logce(fmt ...) ngx_conf_log_error(NGX_LOG_ERR, cf, 0, LOG_PREFIX fmt)
 
 /* cycle log */
-#	define logy(fmt ...) ngx_log_debug(NGX_LOG_ERR, cycle->log, 0, ":::"fmt)
-#	define logye(fmt ...) ngx_log_debug(NGX_LOG_ERR, cycle->log, 0, ":::"fmt)
+#define logy(fmt ...)  ngx_log_error(NGX_LOG_DEBUG, cycle->log, 0, LOG_PREFIX fmt)
+#define logye(fmt ...) ngx_log_error(NGX_LOG_ERR, cycle->log, 0, LOG_PREFIX fmt)
 
-#	define logmc(fmt ...) fprintf(stderr, ":::"fmt)
-#	define logmce(fmt ...) fprintf(stderr, ":::"fmt)
+#define logmc(fmt ...)  fprintf(stderr, LOG_PREFIX fmt)
+#define logmce(fmt ...) fprintf(stderr, LOG_PREFIX fmt)
+
+#define by_offset(p,type,off) (type*)(&((char*)(p))[(off)])
 
 /* without current : c is index */
-#	define next_tok(d,l,del,c) do{++(c);} while((c) < (l) && (del) != (d)[(c)])
+/* TODO fix other reference */
+/* TODO skip */
+#define next_tok(d,l,del,c) while((c) < (l) && (del) != (d)[(c)]) {++(c);}
+
+/**
+ * char esc
+ */
+#define next_tok_esc(d,l,del,esc)                                               \
+({                                                                              \
+    char *c = (d);                                                              \
+    char *e = (d) + (l);                                                        \
+    while(c < e && (del) != *c) {                                               \
+      if ((esc) == *c) {                                                        \
+        ++c;                                                                    \
+      }                                                                         \
+      ++c;                                                                      \
+    }                                                                           \
+    __return(min(c, e));                                                        \
+})
+
+#define bufprintf(n,buf,fmt...)                                                 \
+  do{                                                                           \
+    (n) = sprintf((char*)(buf)->last,fmt);                                      \
+    if ((buf)->last + (n) + 1 /* 0 */ > (buf)->end) {(n) = -1;};                \
+    (buf)->last += (n);                                                         \
+    *(buf)->last = 0;                                                           \
+  }while(0)
+
+#define ngx_array_get(a,n) (&((char*)((a)->elts))[n * (a)->size])
+
+
+#define ngx_str_buf(s,size)                                                                         \
+    u_char ___buf_of_##s[size];                                                                      \
+    ngx_str_t s = {size, ___buf_of_##s};
+
+
+
+#define strp(s)  s.len, s.data
+#define strpp(s) s->len, s->data
+
+#define str_ref_vv(s,v) do{(s)->data = (v)->data; (s)->len = (v)->len;}while(0)
+#define str_ref_buf(s,b) do{(s)->data = (b)->pos; (s)->len = (b)->last - (b)->pos;}while(0)
+#define str_ref_str(s,t) do{(s)->data = (t)->data; (s)->len = (t)->len;}while(0)
+#define str_ref(s, cc) ({(s)->data = (u_char*)(cc); (s)->len = sizeof((cc)) - 1;})
+
+#define ngx_str_eq(a, b) ((a)->len == (b)->len && 0 == ngx_strncmp((a)->data, (b)->data, (a)->len))
+#define ngx_str_pre(a, b) ((a)->len <= (b)->len && 0 == ngx_strncmp((a)->data, (b)->data, (a)->len))
+
+
+#define get_vv_reterr(v, r, idx) do {                                                               \
+  (v) = ngx_http_get_flushed_variable((r), (idx));                                                  \
+  if (NULL == (v) || !(v)->valid || (v)->not_found) {                                               \
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, (r)->connection->log, 0,                                      \
+        "::: Cant find variable "#v" at index[%d]", (idx));                                         \
+    return NGX_ERROR;                                                                               \
+  }                                                                                                 \
+} while(0)
+
+#define get_vv_ornull(v, r, idx) do {                                                               \
+  (v) = ngx_http_get_flushed_variable((r), (idx));                                                  \
+  if (NULL == (v)) {                                                                                \
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, (r)->connection->log, 0,                                      \
+        "::: no variable "#v" at index[%d]", (idx));                                                \
+    return NGX_ERROR;                                                                               \
+  }                                                                                                 \
+  else {                                                                                            \
+    if ((v)->not_found || !(v)->valid) {                                                            \
+      (v)->data = NULL;                                                                             \
+      (v)->len = 0;                                                                                 \
+      (v)->not_found = 0;                                                                           \
+      (v)->valid = 1;                                                                               \
+    }                                                                                               \
+  }                                                                                                 \
+} while(0)
+
+
+/* uri unescape */
+
+#define is_ltr(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))
+#define to_lower(c) (c|0x20)
+#define is_num(c) ((c) >= '0' && (c) <= '9')
+#define is_af(c) (((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
+#define is_x(c) (is_num(c) || is_af(c))
+
+#define x_to_c(c) (is_af(c) ? (to_lower(c) - 'a' + 10) : ((c) - '0'))
+
+
+/**
+ * unescape from 'from' of length 'len' & write to 'to',
+ * 'to' will be modified to point to the last char unescaped
+ */
+#define uri_unescape(to, from, len)                                             \
+    do {                                                                        \
+                                                                                \
+      ngx_uint_t i;                                                             \
+      ngx_uint_t j;                                                             \
+      u_char c;                                                                 \
+      for (i= 0, j=0; i < (len); ++i){                                          \
+        if ((from)[i] == '+')  {                                                \
+          (to)[j++] = ' ';                                                      \
+        }                                                                       \
+                                                                                \
+        else if ((from)[i] == '%' && i < (len) - 2) {                           \
+          if (is_x((from)[i+1])                                                 \
+              && is_x((from)[i+2])) {                                           \
+            c = x_to_c((from)[i+1]) << 4;                                       \
+            c |= x_to_c((from)[i+2]);                                           \
+            if (0 && c == '<') {                                                     \
+              (to)[j++] = '&';                                                  \
+              (to)[j++] = 'l';                                                  \
+              (to)[j++] = 't';                                                  \
+              (to)[j++] = ';';                                                  \
+            }                                                                   \
+            else if (0 && c == '>') {                                                \
+              (to)[j++] = '&';                                                  \
+              (to)[j++] = 'g';                                                  \
+              (to)[j++] = 't';                                                  \
+              (to)[j++] = ';';                                                  \
+            }                                                                   \
+            else {                                                              \
+              (to)[j++] = c;                                                    \
+            }                                                                   \
+                                                                                \
+            i += 2;                                                             \
+          }                                                                     \
+          else {                                                                \
+            (to)[j++] = i;                                                      \
+          }                                                                     \
+        }                                                                       \
+        else {                                                                  \
+          (to)[j++] = (from)[i];                                                \
+        }                                                                       \
+      }                                                                         \
+      (to) = &(to)[j];                                                          \
+    } while(0)
+
+
+
+
+#define uri_unescape_p(pool, to, tolen, from, len)                              \
+  do {                                                                          \
+     u_char *buf = ngx_palloc((pool), (len));                                   \
+      if (NULL == buf) {                                                        \
+        (to) = NULL;                                                            \
+        (tolen) = 0;                                                            \
+        break;                                                                  \
+      }                                                                         \
+      u_char *o = buf;                                                          \
+      uri_unescape(o, (from), (len));                                           \
+      (to) = buf;                                                               \
+      (tolen) = o - buf;                                                        \
+  } while (0)
+
+#define variable_isvalid(v) ((v) && (v)->valid && !(v)->not_found)
+#define variable_isok(v) (variable_isvalid(v) && (v)->len)
+
+#define buf_len(b) ((b)->last - (b)->pos)
+
+
+#ifndef __UTIL_WITHOUT_FUNC__
+
+
 
   static char *
 ngx_http_get_var_name_str(ngx_str_t *v, ngx_str_t *n)
 {
   if ('$' != v->data[0]) {
-    return "found invalid variable name";
+    return (char*)"found invalid variable name";
   }
   n->data = v->data + 1;
   n->len  = v->len - 1;
@@ -63,6 +241,19 @@ append_str(u_char *start, u_char *end, ngx_str_t *s)
 
 
   static ngx_int_t
+ngx_buf_append_str(ngx_buf_t *buf, ngx_str_t *str)
+{
+  u_char * nb = append_str(buf->last, buf->end, str);
+  if (NULL == nb) {
+    return NGX_ERROR;
+  }
+
+  buf->last = nb;
+  return NGX_OK;
+}
+
+
+  static ngx_int_t
 str_to_array_0(u_char *data, ngx_int_t len, u_char del, ngx_array_t **arr)
 {
   ngx_int_t i = 0;
@@ -83,7 +274,7 @@ str_to_array_0(u_char *data, ngx_int_t len, u_char del, ngx_array_t **arr)
     next_tok(data, len, del, i);
     e = &data[i];
 
-    str = ngx_array_push(*arr);
+    str = (ngx_str_t*)ngx_array_push(*arr);
     if (NULL == str){ return NGX_ERROR; }
 
     str->data = s;
@@ -126,24 +317,35 @@ str_to_array(ngx_pool_t *p, u_char *data, ngx_int_t len, u_char del,
   /* return NGX_OK; */
 }
 
+
+#define MK_cp(n) ((char*)n)
+#define AJ_item(arr,off,i) (&MK_cp((arr)->elts)[(i) * (arr)->size + (off)])
+
   static ngx_int_t
-array_join(ngx_pool_t *p,  ngx_str_t *re, ngx_array_t *arr, ngx_str_t *head, ngx_str_t *tail, 
-  ngx_str_t *pre, ngx_str_t *suf, ngx_str_t *del)
+array_join(ngx_pool_t *p,
+    ngx_str_t *re,
+    ngx_array_t *arr,
+    ngx_int_t item_offset,
+    ngx_str_t *head,
+    ngx_str_t *tail,
+
+    ngx_str_t *pre,
+    ngx_str_t *suf,
+    ngx_str_t *del)
 {
 
-  ngx_int_t len;
-  ngx_int_t n;
-  ngx_int_t i;
+  ngx_int_t  len;
+  ngx_int_t  n;
+  ngx_int_t  i;
   ngx_str_t *item;
 
-  u_char *c;
-  u_char *e;
+  u_char    *c;
+  u_char    *e;
 
   len = 0;
   n = arr->nelts;
   for (i= 0; i < n; ++i){
-    item = arr->elts;
-    item = &item[i];
+    item = (ngx_str_t*)AJ_item(arr, item_offset, i);
     len += item->len;
   }
 
@@ -151,9 +353,15 @@ array_join(ngx_pool_t *p,  ngx_str_t *re, ngx_array_t *arr, ngx_str_t *head, ngx
   if (NULL != tail) len += tail->len;
   if (NULL != pre)  len += pre->len * n;
   if (NULL != suf)  len += suf->len * n;
-  if (NULL != del)  len += del->len * (n-1);
+  if (NULL != del)  len += del->len * ((n > 1)? (n - 1) : 0);
 
-  re->data = ngx_palloc(p, len+1);
+  if (0 >= len) {
+    re->data = (u_char*)"";
+    re->len = 0;
+    return NGX_OK;
+  }
+
+  re->data = (u_char*)ngx_palloc(p, len + 1);
   if (NULL == re->data){
     return NGX_ERROR;
   }
@@ -162,16 +370,18 @@ array_join(ngx_pool_t *p,  ngx_str_t *re, ngx_array_t *arr, ngx_str_t *head, ngx
   c = re->data;
   e = &re->data[len];
   c = append_str(c, e, head);
+
   for (i= 0; i < n-1; ++i){
-    item = arr->elts;
-    item = &item[i];
+
+    item = (ngx_str_t*)AJ_item(arr, item_offset, i);
+
     c = append_str(c, e, pre);
     c = append_str(c, e, item);
     c = append_str(c, e, suf);
     c = append_str(c, e, del);
   }
-  item = arr->elts;
-  item = &item[i];
+
+  item = (ngx_str_t*)AJ_item(arr, item_offset, i);
   c = append_str(c, e, pre);
   c = append_str(c, e, item);
   c = append_str(c, e, suf);
@@ -186,20 +396,20 @@ array_join(ngx_pool_t *p,  ngx_str_t *re, ngx_array_t *arr, ngx_str_t *head, ngx
 
   static ngx_int_t
 array_join_x(
-  ngx_pool_t  *p,
+    ngx_pool_t  *p,
 
-  ngx_str_t   *re,
-  ngx_array_t *arr,
-  ngx_int_t    step,
+    ngx_str_t   *re,
+    ngx_array_t *arr,
+    ngx_int_t    step,
 
-  ngx_str_t   *head,
-  ngx_str_t   *tail,
+    ngx_str_t   *head,
+    ngx_str_t   *tail,
 
-  ngx_str_t   *lhead,
-  ngx_str_t   *ltail,
-  ngx_str_t   *ldel,
+    ngx_str_t   *lhead,
+    ngx_str_t   *ltail,
+    ngx_str_t   *ldel,
 
-  ngx_array_t *dels   /* ngx_str_t */)
+    ngx_array_t *dels   /* ngx_str_t */)
 {
 
   ngx_int_t  len;
@@ -218,14 +428,10 @@ array_join_x(
 
   if (0 >= step) step = 1;
 
-  n = arr->nelts;//chaimvy modified
   if (0 != n % step) return NGX_ERROR;
 
-	/*if dels is empty, should be NULL*/
-	if (dels->nelts == 0) dels = NULL;
-
   if (NULL != dels) {
-    del = dels->elts;
+    del = (ngx_str_t*)dels->elts;
     ndel = dels->nelts;
   }
 
@@ -234,7 +440,7 @@ array_join_x(
   len = 0;
   n = arr->nelts;
   for (i= 0; i < n; ++i){
-    item = arr->elts;
+    item = (ngx_str_t*)arr->elts;
     item = &item[i];
     len += item->len;
   }
@@ -252,7 +458,7 @@ array_join_x(
     }
   }
 
-  re->data = ngx_palloc(p, len+1);
+  re->data = (u_char*)ngx_palloc(p, len+1);
   if (NULL == re->data){
     return NGX_ERROR;
   }
@@ -260,7 +466,7 @@ array_join_x(
   if (0 == n) { ln = 0; }
   else  { ln = (n-1) / step + 1; }
 
-  item = arr->elts;
+  item = (ngx_str_t*)arr->elts;
   item = &item[(ln - 1) * step];
   if (NULL == item->data && 0 == item->len) {
     --ln;
@@ -272,7 +478,7 @@ array_join_x(
 
   for (i= 0; i < ln; ++i){
 
-    item = arr->elts;
+    item = (ngx_str_t*)arr->elts;
     item = &item[i * step];
     if (NULL == item->data && 0 == item->len) {continue;}
 
@@ -280,7 +486,7 @@ array_join_x(
 
     for (j= 0; j < step; ++j){
 
-      item = arr->elts;
+      item = (ngx_str_t*)arr->elts;
       item = &item[i * step + j];
 
       c = append_str(c, e, item);
@@ -293,7 +499,7 @@ array_join_x(
 
     c = append_str(c, e, ltail);
 
-    if (ln - 1 != i) 
+    if (ln - 1 != i)
       c = append_str(c, e, ldel);
   }
 
@@ -309,9 +515,63 @@ array_join_x(
   return NGX_OK;
 }
 
+  static ngx_int_t
+ngx_uuid(ngx_str_t *u)
+{
+  uuid_t uuid;
+  if (NULL == u || u->len < UUID_LEN) {
+    return NGX_ERROR;
+  }
+  uuid_generate(uuid);
+  uuid_unparse(uuid, (char*)u->data);
+  return NGX_OK;
+}
 
 
+  static ngx_int_t
+ngx_htmlencoding(ngx_pool_t *pool, ngx_str_t *s)
+{
+  ngx_uint_t i;
+  ngx_uint_t j;
+  ngx_uint_t n;
+  ngx_uint_t len;
+  u_char *d;
+  for (i= 0; i < s->len; ++i){
+    if (s->data[i] == '<' || s->data[i] == '>') {
+      ++n;
+    }
+  }
 
+  len = s->len + n * 3;
+  d = ngx_palloc(pool, len);
+  if (NULL == d) {
+    return NGX_ERROR;
+  }
 
+  for (i = 0, j = 0; i < s->len; ++i){
+    if (s->data[i] == '<') {
+      d[j++] = '&';
+      d[j++] = 'l';
+      d[j++] = 't';
+      d[j++] = ';';
+    }
+    else if (s->data[i] == '>') {
+      d[j++] = '&';
+      d[j++] = 'g';
+      d[j++] = 't';
+      d[j++] = ';';
+    }
+    else {
+      d[j++] = s->data[i];
+    }
+  }
+
+  s->data = d;
+  s->len = j;
+
+  return NGX_OK;
+}
+
+#endif /* __UTIL_WITHOUT_FUNC__ */
 
 #endif
