@@ -1,0 +1,1 @@
+HTTP_INCS="$HTTP_INCS -I ../ngx_util"
