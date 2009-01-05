@@ -1,18 +1,47 @@
 #!/bin/bash
 
 
-# I'm a server control script
+#                          I'm a server control script
+#
+#
+#
+#                                                                        SIGNALs
+#                                     master
+# ------------------------------------------------------------------------------
+# TERM,INT      Quick shutdown
+# QUIT          Graceful shutdown
+# HUP           Configuration reload Start the new worker processes with a
+#               new configuration Gracefully shutdown the old worker processes
+# USR1          Reopen the log files
+# USR2          Upgrade Executable on the fly
+# WINCH         Gracefully shutdown the worker processes 
+# 
+#                                     worker
+# ------------------------------------------------------------------------------
+# TERM,         INT Quick shutdown
+# QUIT          Graceful shutdown
+# USR1          Reopen the log files 
+
 
 . conf
-
 
 GDB_TUI="-tui"
 MPID=`cat $PREFIX/$FULLNAME/logs/nginx.pid`
 
 
+InstallConf()
+{ #{{{
+
+  cp -Rf $CONF_DIR/*.nginx.conf $CONF_TAR
+  cp -Rf conf.src/$PubVer/*.nginx.conf $CONF_TAR
+
+} #}}}
+
 Kill()
 { #{{{
+
   kill -SIGQUIT $MPID
+
 } #}}}
 
 Debug()
@@ -84,43 +113,40 @@ Start()
 
 case $1 in 
   "mk")
-  make
+    make
   ;;
 
   "up")
-  make
-  GenerateConf
-  > $PREFIX/$FULLNAME/logs/error.log
-  Start
+    make
+    InstallConf
+    Start
   ;;
 
   "down")
-  Kill
+    Kill
   ;;
 
   "pack")
-  echo nothing done
+    echo nothing done
   ;;
 
   "rest") 
-  make
-  ps -ef | grep $FULLNAME | fgrep -v grep | grep master
-  Kill
-  GenerateConf
-  Start
-  ps -ef | grep $FULLNAME | fgrep -v grep | grep master
+    make
+    Kill
+    InstallConf
+    Start
   ;;
 
   "gdb")
-  Debug
+    Debug
   ;;
 
   "st")
-  Strace
+    Strace
   ;;
 
   "stdown")
-  StraceDown
+    StraceDown
   ;;
 
   *)

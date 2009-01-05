@@ -2,12 +2,20 @@
 
 DEBUG=1
 
+PubVer=release
+if [ 1 -eq $DEBUG ];then
+  PubVer=debug
+fi
+
 NAME=ngmp.
 FULLNAME=${NAME}nginx
 PREFIX=/data1
 NGINX_SRC=c/nginx-0.6.31
 CONF_DIR=$NGINX_SRC/conf
+CONF_TAR=$PREFIX/$FULLNAME/conf
 
 
 echo $FULLNAME
 echo $PWD
+
+echo $PubVer

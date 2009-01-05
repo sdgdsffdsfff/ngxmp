@@ -83,11 +83,11 @@ make install
 
 
 # link
-rm $PRE/conf/nginx.conf -rf
-ln -s $PWD/conf/nginx.conf $PRE/conf/nginx.conf
+# rm $PRE/conf/nginx.conf -rf
+# ln -s $PWD/conf/nginx.conf $PRE/conf/nginx.conf
 
-rm $PRE/html -rf
-ln -s $PWD/html $PRE/html
+# rm $PRE/html -rf
+# ln -s $PWD/html $PRE/html
 
 cd -
 
