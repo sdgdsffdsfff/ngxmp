@@ -32,8 +32,9 @@ MPID=`cat $PREFIX/$FULLNAME/logs/nginx.pid`
 InstallConf()
 { #{{{
 
-  cp -Rf $CONF_DIR/*.nginx.conf $CONF_TAR
-  cp -Rf conf.src/$PubVer/*.nginx.conf $CONF_TAR
+  cp -Rf $CONF_DIR/* $CONF_TAR/
+  cp -f conf.src/* $CONF_TAR/
+  cp -Rf conf.src/$PubVer/*.nginx.conf $CONF_TAR/
 
 } #}}}
 
@@ -118,7 +119,9 @@ case $1 in
 
   "up")
     make
+    echo "------------------------"
     InstallConf
+    echo "------------------------"
     Start
   ;;
 

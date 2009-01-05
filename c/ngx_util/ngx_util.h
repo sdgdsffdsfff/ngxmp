@@ -4,8 +4,11 @@
 #ifndef __ngx_util__
 #	define __ngx_util__
 
-#include <uuid/uuid.h>
+
+
 #define UUID_LEN 37
+
+
 
 #define __return(s) (s)
 
@@ -515,6 +518,7 @@ array_join_x(
   return NGX_OK;
 }
 
+#ifdef _UUID_UUID_H
   static ngx_int_t
 ngx_uuid(ngx_str_t *u)
 {
@@ -526,6 +530,7 @@ ngx_uuid(ngx_str_t *u)
   uuid_unparse(uuid, (char*)u->data);
   return NGX_OK;
 }
+#endif
 
 
   static ngx_int_t
