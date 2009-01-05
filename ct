@@ -5,48 +5,59 @@
 
 . conf
 
+
+GDB_TUI="-tui"
+MPID=`cat $PREFIX/$FULLNAME/logs/nginx.pid`
+
+
 Kill()
 { #{{{
-
-  PID=`cat $PREFIX/$FULLNAME/logs/nginx.pid`
-  # PID=`ps -ef | grep $FULLNAME | fgrep -v grep | grep master | awk '{print $2}'`
-  kill -SIGQUIT $PID
+  kill -SIGQUIT $MPID
 } #}}}
 
 Debug()
 { #{{{
-  # start debug at 1 worder
 
-  MPID=`ps -ef | grep $FULLNAME | fgrep -v grep | grep master | awk '{print $2}'`
+  # start debug at 1 worder
   WPID=`ps -ef | grep $MPID | fgrep -v grep | grep worker | head -n1 | awk '{print $2}'`
-  echo to debug : $WPID
-  gdb program $WPID -x gdb.cmd
+  gdb $GDB_TUI program $WPID -x gdb.cmd
+
+} #}}}
+
+DebugMain()
+{ #{{{
+
+  sudo gdb $GDB_TUI $PREFIX/$FULLNAME/sbin/$FULLNAME -x gdb.start
+
 } #}}}
 
 Strace()
 { #{{{
+
   while [ 1 ]; do
-    MPID=`ps -ef | grep $FULLNAME | fgrep -v grep | grep master | awk '{print $2}'`
     WPID=`ps -ef | grep $MPID | fgrep -v grep | grep worker | awk '{print $2}'`
     echo $WPID
     # strace -v -e trace=writev -e write=6 -p $WPID
     strace -v -p $WPID
-    echo "\n\n\n\n\n"
+    echo "-----------------------------------------------------"
   done
+
 } #}}}
 
 StraceDown()
 { #{{{
+
   SHELLPID=`ps -ef | grep strace | fgrep -v grep | awk '{print $3}'`
   STPID=`ps -ef | grep strace | fgrep -v grep | awk '{print $2}'`
   kill $SHELLPID
   kill $STPID
+
 } #}}}
 
 GenerateConf()
 { #{{{
-  CD=$PWD/conf.src/debug
 
+  CD=$PWD/conf.src/debug
 
   if [ $DEBUG = 1 ]; then
     echo debug mode
@@ -63,8 +74,13 @@ GenerateConf()
 
 } #}}}
 
+Start()
+{ #{{{
 
-Start="$PREFIX/$FULLNAME/sbin/$FULLNAME"
+  $PREFIX/$FULLNAME/sbin/$FULLNAME
+
+} #}}}
+
 
 case $1 in 
   "mk")
@@ -75,7 +91,7 @@ case $1 in
   make
   GenerateConf
   > $PREFIX/$FULLNAME/logs/error.log
-  `$Start`
+  Start
   ;;
 
   "down")
@@ -90,9 +106,8 @@ case $1 in
   make
   ps -ef | grep $FULLNAME | fgrep -v grep | grep master
   Kill
-  # > $PREFIX/$FULLNAME/logs/error.log
   GenerateConf
-  `$Start`
+  Start
   ps -ef | grep $FULLNAME | fgrep -v grep | grep master
   ;;
 
@@ -109,7 +124,8 @@ case $1 in
   ;;
 
   *)
-  echo .....
+    echo Usage : 
+    echo "   " $0 "[mk|up|down|rest|gdb|st|stdown]"
   ;;
 esac
 
