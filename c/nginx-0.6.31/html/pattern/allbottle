@@ -1,3 +1,0 @@
-<!--# block name="empty" --><!--# endblock -->
-<!--# echo var="ssipre" default="" -->{"send":"<!--# include virtual="/key?c_send_all"  stub="empty" -->", "reply":"<!--# include virtual="/key?c_send_reply"  stub="empty" -->"}<!--# echo var="ssisuf" default="" -->
-
