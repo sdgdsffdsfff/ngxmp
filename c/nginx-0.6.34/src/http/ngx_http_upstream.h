@@ -90,6 +90,12 @@ struct ngx_http_upstream_srv_conf_s {
 
     ngx_array_t                    *servers;   /* ngx_http_upstream_server_t */
 
+    ngx_array_t                    *values;
+    ngx_array_t                    *lengths;
+    ngx_uint_t                      retries;
+
+    ngx_uint_t                    (*hash_function)(u_char *data, size_t len);
+
     ngx_uint_t                      flags;
     ngx_str_t                       host;
     u_char                         *file_name;
