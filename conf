@@ -10,7 +10,7 @@ fi
 NAME=ngmp.
 FULLNAME=${NAME}nginx
 PREFIX=/data1
-NGINX_SRC=c/nginx-0.6.31
+NGINX_SRC=c/nginx-0.6.34
 CONF_DIR=$NGINX_SRC/conf
 CONF_TAR=$PREFIX/$FULLNAME/conf
 

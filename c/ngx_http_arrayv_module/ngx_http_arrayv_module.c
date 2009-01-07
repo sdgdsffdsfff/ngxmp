@@ -375,9 +375,8 @@ ngx_http_av_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v,
 
   /*if use set null or empty ,should define the vars
    *
-   ngx_int_t emptynum = 0;/*n%step!=0*/
-  ngx_str_t nullstr = {1," "};/*or ngx_null_string.*/
-  */
+   ngx_int_t emptynum = 0;
+  ngx_str_t nullstr = {1," "};or ngx_null_string.*/
 
       mcf = ngx_http_get_module_main_conf(r, ngx_http_av_module);
   if (NULL == mcf)

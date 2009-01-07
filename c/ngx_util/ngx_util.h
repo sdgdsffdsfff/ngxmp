@@ -416,7 +416,7 @@ array_join_x(
 {
 
   ngx_int_t  len;
-  ngx_int_t  n;
+  ngx_int_t  n = 0;
   ngx_int_t  ln;
   ngx_int_t  i;
   ngx_int_t  j;
