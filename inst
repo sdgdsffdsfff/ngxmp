@@ -2,6 +2,7 @@
 
 . conf
 
+
 PRE=$PREFIX/$FULLNAME
 
 MODULE_hash=../nginx_upstream_hash-0.2
