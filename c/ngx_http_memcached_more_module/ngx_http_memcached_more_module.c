@@ -1,4 +1,3 @@
-
 /** 
  * TODO segment fault on without setting prefix
  */
@@ -13,23 +12,23 @@
 #define logv(r, d)	log(r, #d"=%v", (d))
 #define logcs(r, d)	log(r, #d"=%s", (d))
 
-typedef struct
-{
+typedef struct {
   ngx_http_upstream_conf_t upstream;
-  ngx_int_t prefix_index;
-  ngx_int_t suffix_index;
-  ngx_int_t key_index;
-  ngx_int_t value_index;
-} ngx_http_mcm_loc_conf_t;
+  ngx_int_t                prefix_index;
+  ngx_int_t                suffix_index;
+  ngx_int_t                key_index;
+  ngx_int_t                value_index;
+} 
+ngx_http_mcm_loc_conf_t;
 
-typedef struct
-{
-  size_t rest;
+typedef struct {
+  size_t              rest;
   ngx_http_request_t *request;
-  ngx_str_t key;
-  ngx_uint_t times;
-  ngx_str_t pre;
-} ngx_http_mcm_ctx_t;
+  ngx_str_t           key;
+  ngx_uint_t          times;
+  ngx_str_t           pre;
+} 
+ngx_http_mcm_ctx_t;
 
 typedef struct mc_res_s
 {
@@ -39,7 +38,8 @@ typedef struct mc_res_s
   ngx_str_t vlen;
   ngx_str_t val;
   ngx_str_t end;
-} mc_res_t;
+} 
+mc_res_t;
 
 /* memcached response error  */
 #define MC_PARSE_NO_HEAD -1

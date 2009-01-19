@@ -323,6 +323,12 @@ ngx_http_repl_handler(ngx_http_request_t* r)
   out_ctl->pos      = out_buf;
   out_ctl->last     = oc;
   out_ctl->memory   = 1;
+
+  /**
+   * TODO fix me!! in ssi this shoud not be specified, but in main request it
+   * should be specified
+   */
+  if (r == r->main)
   out_ctl->last_buf = 1;
 
   ngx_http_send_header(r);
