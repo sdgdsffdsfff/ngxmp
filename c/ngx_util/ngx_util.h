@@ -4,13 +4,12 @@
 #ifndef __ngx_util__
 #	define __ngx_util__
 
+#define __return(s) (s)
+
+#include "ngx_str_util.h"
 
 
 #define UUID_LEN 37
-
-
-
-#define __return(s) (s)
 
 
 #ifndef min
@@ -71,48 +70,36 @@
 #define ngx_array_get(a,n) (&((char*)((a)->elts))[n * (a)->size])
 
 
-#define ngx_str_buf(s,size)                                                                         \
-    u_char ___buf_of_##s[size];                                                                      \
-    ngx_str_t s = {size, ___buf_of_##s};
 
 
 
-#define strp(s)  s.len, s.data
-#define strpp(s) s->len, s->data
-
-#define str_ref_vv(s,v) do{(s)->data = (v)->data; (s)->len = (v)->len;}while(0)
-#define str_ref_buf(s,b) do{(s)->data = (b)->pos; (s)->len = (b)->last - (b)->pos;}while(0)
-#define str_ref_str(s,t) do{(s)->data = (t)->data; (s)->len = (t)->len;}while(0)
-#define str_ref(s, cc) ({(s)->data = (u_char*)(cc); (s)->len = sizeof((cc)) - 1;})
-
-#define ngx_str_eq(a, b) ((a)->len == (b)->len && 0 == ngx_strncmp((a)->data, (b)->data, (a)->len))
-#define ngx_str_pre(a, b) ((a)->len <= (b)->len && 0 == ngx_strncmp((a)->data, (b)->data, (a)->len))
 
 
-#define get_vv_reterr(v, r, idx) do {                                                               \
-  (v) = ngx_http_get_flushed_variable((r), (idx));                                                  \
-  if (NULL == (v) || !(v)->valid || (v)->not_found) {                                               \
-    ngx_log_debug(NGX_LOG_DEBUG_HTTP, (r)->connection->log, 0,                                      \
-        "::: Cant find variable "#v" at index[%d]", (idx));                                         \
-    return NGX_ERROR;                                                                               \
-  }                                                                                                 \
+
+#define get_vv_reterr(v, r, idx) do {                                           \
+  (v) = ngx_http_get_flushed_variable((r), (idx));                              \
+  if (NULL == (v) || !(v)->valid || (v)->not_found) {                           \
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, (r)->connection->log, 0,                  \
+        "::: Cant find variable "#v" at index[%d]", (idx));                     \
+    return NGX_ERROR;                                                           \
+  }                                                                             \
 } while(0)
 
-#define get_vv_ornull(v, r, idx) do {                                                               \
-  (v) = ngx_http_get_flushed_variable((r), (idx));                                                  \
-  if (NULL == (v)) {                                                                                \
-    ngx_log_debug(NGX_LOG_DEBUG_HTTP, (r)->connection->log, 0,                                      \
-        "::: no variable "#v" at index[%d]", (idx));                                                \
-    return NGX_ERROR;                                                                               \
-  }                                                                                                 \
-  else {                                                                                            \
-    if ((v)->not_found || !(v)->valid) {                                                            \
-      (v)->data = NULL;                                                                             \
-      (v)->len = 0;                                                                                 \
-      (v)->not_found = 0;                                                                           \
-      (v)->valid = 1;                                                                               \
-    }                                                                                               \
-  }                                                                                                 \
+#define get_vv_ornull(v, r, idx) do {                                           \
+  (v) = ngx_http_get_flushed_variable((r), (idx));                              \
+  if (NULL == (v)) {                                                            \
+    ngx_log_debug(NGX_LOG_DEBUG_HTTP, (r)->connection->log, 0,                  \
+        "::: no variable "#v" at index[%d]", (idx));                            \
+    return NGX_ERROR;                                                           \
+  }                                                                             \
+  else {                                                                        \
+    if ((v)->not_found || !(v)->valid) {                                        \
+      (v)->data = NULL;                                                         \
+      (v)->len = 0;                                                             \
+      (v)->not_found = 0;                                                       \
+      (v)->valid = 1;                                                           \
+    }                                                                           \
+  }                                                                             \
 } while(0)
 
 

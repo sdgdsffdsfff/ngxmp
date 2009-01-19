@@ -15,7 +15,3 @@ CONF_DIR=$NGINX_SRC/conf
 CONF_TAR=$PREFIX/$FULLNAME/conf
 
 
-echo $FULLNAME
-echo $PWD
-
-echo $PubVer
