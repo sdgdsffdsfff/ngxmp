@@ -1,3 +1,5 @@
-break ngx_http_script_copy_var_len_code
-break ngx_http_script_run
+break _ngx_http_script_copy_var_len_code
+break _ngx_http_script_run
+break ngx_http_send_header
+break ngx_http_write_filter
 

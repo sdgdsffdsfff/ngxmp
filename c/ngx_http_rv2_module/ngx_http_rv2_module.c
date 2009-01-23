@@ -84,12 +84,6 @@ typedef struct {
   ngx_httP_eval_t           defalt_val_e;
 
 
-
-
-
-
-
-
   /* TODO time outs */
 
   /* TODO rc */
@@ -191,6 +185,9 @@ ngx_http_rv2_module = {
   NULL,                                         /* exit master */
   NGX_MODULE_V1_PADDING
 };
+
+
+
 
 
   static ngx_int_t   
