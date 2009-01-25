@@ -15,17 +15,20 @@ MODULE_rand=../ngx_http_rand_module
 MODULE_time=../ngx_http_time_module
 MODULE_list=../ngx_http_list_module
 MODULE_av=../ngx_http_arrayv_module
+
 # --add-module=${MODULE_rv2}		\
-Conf_Mod="\
-  --add-module=${MODULE_hash}		\
-  --add-module=${MODULE_empty}		\
-  --add-module=${MODULE_repl}		\
-  --add-module=${MODULE_rv}		\
-  --add-module=${MODULE_vwrite}		\
-  --add-module=${MODULE_rand}		\
-  --add-module=${MODULE_time}		\
-  --add-module=${MODULE_list}		\
-	--add-module=${MODULE_av}			\
+
+Conf_Mod="                              \
+  --add-module=${MODULE_hash}           \
+  --add-module=../ngx_http_usset_module \
+  --add-module=${MODULE_empty}          \
+  --add-module=${MODULE_repl}           \
+  --add-module=${MODULE_rv}             \
+  --add-module=${MODULE_vwrite}         \
+  --add-module=${MODULE_rand}           \
+  --add-module=${MODULE_time}           \
+  --add-module=${MODULE_list}           \
+  --add-module=${MODULE_av}             \
 "
 
 Conf_Dbg="\

@@ -7,6 +7,7 @@
 #define __return(s) (s)
 
 #include "ngx_str_util.h"
+#include "ngx_hash_util.h"
 
 
 #define UUID_LEN 37
