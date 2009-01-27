@@ -57,7 +57,7 @@ Debug()
 DebugMain()
 { #{{{
 
-  sudo gdb $GDB_TUI $PREFIX/$FULLNAME/sbin/$FULLNAME -x gdb.start
+  gdb $GDB_TUI $PREFIX/$FULLNAME/sbin/$FULLNAME -x gdb.start
 
 } #}}}
 
@@ -142,6 +142,10 @@ case $1 in
 
   "gdb")
     Debug
+  ;;
+
+  "gm")
+    DebugMain
   ;;
 
   "st")

@@ -6,8 +6,6 @@
 
 #define __return(s) (s)
 
-#include "ngx_str_util.h"
-#include "ngx_hash_util.h"
 
 
 #define UUID_LEN 37
@@ -29,6 +27,7 @@
 /* conf log */
 #define logc(fmt ...)  ngx_conf_log_error(NGX_LOG_DEBUG, cf, 0, LOG_PREFIX fmt)
 #define logce(fmt ...) ngx_conf_log_error(NGX_LOG_ERR, cf, 0, LOG_PREFIX fmt)
+
 
 /* cycle log */
 #define logy(fmt ...)  ngx_log_error(NGX_LOG_DEBUG, cycle->log, 0, LOG_PREFIX fmt)
@@ -186,6 +185,10 @@
 
 #define buf_len(b) ((b)->last - (b)->pos)
 
+#include "ngx_str_util.h"
+#include "ngx_hash_util.h"
+#include "ngx_debug_util.h"
+#include "ngx_memcached_util.h"
 
 #ifndef __UTIL_WITHOUT_FUNC__
 
@@ -195,6 +198,7 @@
 ngx_http_get_var_name_str(ngx_str_t *v, ngx_str_t *n)
 {
   if ('$' != v->data[0]) {
+    fprintf(stderr, "%.*s", strpp(v));
     return (char*)"found invalid variable name";
   }
   n->data = v->data + 1;

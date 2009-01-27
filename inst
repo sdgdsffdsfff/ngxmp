@@ -9,7 +9,6 @@ MODULE_hash=../nginx_upstream_hash-0.2
 MODULE_empty=../ngx_http_empty_module
 MODULE_repl=../ngx_http_repl_module
 MODULE_rv=../ngx_http_rv_module
-MODULE_rv2=../ngx_http_rv2_module
 MODULE_vwrite=../ngx_http_vwrite_module
 MODULE_rand=../ngx_http_rand_module
 MODULE_time=../ngx_http_time_module
@@ -17,13 +16,14 @@ MODULE_list=../ngx_http_list_module
 MODULE_av=../ngx_http_arrayv_module
 
 # --add-module=${MODULE_rv2}		\
+# --add-module=../ngx_http_usset_module \
 
 Conf_Mod="                              \
   --add-module=${MODULE_hash}           \
-  --add-module=../ngx_http_usset_module \
   --add-module=${MODULE_empty}          \
   --add-module=${MODULE_repl}           \
   --add-module=${MODULE_rv}             \
+  --add-module=../ngx_http_rv2_module             \
   --add-module=${MODULE_vwrite}         \
   --add-module=${MODULE_rand}           \
   --add-module=${MODULE_time}           \

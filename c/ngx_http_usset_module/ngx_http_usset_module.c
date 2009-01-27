@@ -74,6 +74,8 @@ ngx_http_usset_postconf(ngx_conf_t *cf)
 {
   ngx_http_usset_create_us_hash(cf);
 
+
+
   return NGX_OK;
 }
 
