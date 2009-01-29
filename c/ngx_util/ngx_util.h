@@ -67,7 +67,7 @@
     *(buf)->last = 0;                                                           \
   }while(0)
 
-#define ngx_array_get(a,n) (&((char*)((a)->elts))[n * (a)->size])
+#define ngx_array_get(a,n) ((void*)&((char*)((a)->elts))[n * (a)->size])
 
 
 
