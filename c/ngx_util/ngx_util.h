@@ -70,6 +70,13 @@
 #define ngx_array_get(a,n) ((void*)&((char*)((a)->elts))[n * (a)->size])
 
 
+/**
+ * ngx_array_foreach(a, i) {
+ *    some_type *node = ngx_array_get();
+ * }
+ */
+#define ngx_array_foreach(a, i) for(i = 0; i < (a)->nelts; ++i)
+
 
 
 

@@ -59,13 +59,13 @@ hash_add(hash_t *hash, hash_elt_t *elt)
 
 
   i = elt->hash % hash->size;
-  fprintf(stderr, "hash:%d\n", i);
+  /* fprintf(stderr, "hash:%d\n", i); */
 
   b = &hash->buckets[i];
   
   if (HASH_VAL_UNSET == b->val) {
     *b = *elt;
-    fprintf(stderr, "add as first:%.*s\n", strp(elt->name));
+    /* fprintf(stderr, "add as first:%.*s\n", strp(elt->name)); */
     return NGX_OK;
   }
 
@@ -73,7 +73,7 @@ hash_add(hash_t *hash, hash_elt_t *elt)
 
   b->next = elt;
   elt->next = NULL;
-  fprintf(stderr, "add as tail:%.*s\n", strp(b->next->name));
+  /* fprintf(stderr, "add as tail:%.*s\n", strp(b->next->name)); */
 
   return NGX_OK;
 }
@@ -92,7 +92,7 @@ hash_padd(ngx_pool_t *p, hash_t *hash, ngx_str_t *name, uintptr_t val)
   elt->val = val;
 
   elt->hash = ngx_hash_key(name->data, name->len);
-  fprintf(stderr, "%.*s, %d\n", strpp(name), elt->hash);
+  /* fprintf(stderr, "%.*s, %d\n", strpp(name), elt->hash); */
 
   return hash_add(hash, elt);
 }
