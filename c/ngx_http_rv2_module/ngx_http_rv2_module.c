@@ -1,5 +1,7 @@
 /**
- * rv_dec $varname_var 
+ * TODO default value
+ *
+ * rv_dec $varname_var
  *        upstream="us_name_expr"             # optional   default = ${varname_var}_us
  *        key=$keyname_var                    # optional   default = ${varname_var}_key
  *        hash=hash_method_str                # optional   default = crc32
@@ -9,8 +11,9 @@
  *
  * rv_timeout_read varname timeout;
  *
- * rv_get $value $varname $rc;                # rc is optional, value can be 
- *    [success|timeout|empty|invalid_us|nosuch_us|internal|error]
+ * rv_get $value $varname $rc;                # rc is optional, value can be
+ *    [success|timeout|notfound|invalid_us|nosuch_us|internal|error]
+ *
  * rv_set $rv "$value" $rc;
  * rv_incr $value "$value" $rc;
  * rv_decr $value "$value" $rc;
@@ -21,11 +24,12 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 
+
+
 #include <libmemcached/memcached.h>
 
 #include "ngx_util.h"
 #include "ngx_http_rv2_module.h"
-
 
 
 #define THIS  ngx_http_rv2_module
@@ -39,17 +43,17 @@
 /* that is bad  */
 typedef struct {
   ngx_array_t  *codes;        /* uintptr_t */
-} 
+}
 ngx_http_rewrite_loc_conf_pseudo_t;
 
 /* TODO remove me */
 typedef enum {
-  RV_SET  = 0, 
-  RV_GET, 
-  RV_INCR, 
-  RV_DECR, 
+  RV_SET  = 0,
+  RV_GET,
+  RV_INCR,
+  RV_DECR,
   RV_UNKNOW
-} 
+}
 ngx_http_rv2_op_t;
 
 
@@ -59,16 +63,17 @@ static void      *ngx_http_rv2_create_main_conf (ngx_conf_t *cf);
 static char      *ngx_http_rv2_init_main_conf (ngx_conf_t *cf, void *conf);
 static ngx_int_t  ngx_http_rv2_post_conf (ngx_conf_t *cf);
 static ngx_int_t  ngx_http_rv2_init_proc (ngx_cycle_t *cycle);
- 
+
 static char      *ngx_http_rv2_dec_command (ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
 static char      *ngx_http_rv2_get_command (ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
- 
+
 static void       ngx_http_rv2_get_code (ngx_http_script_engine_t *e);
 static char      *ngx_http_rv2_code_set_gen (ngx_conf_t *cf, ngx_http_variable_t *v);
- 
- 
+
+
 static ngx_int_t  ngx_http_rv2_eval_usname (ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t *v);
- 
+
+static ngx_int_t  ngx_http_rv2_add_var (ngx_conf_t *cf, ngx_str_t *name, ngx_http_variable_t **var);
 static ngx_int_t  ngx_http_rv2_unreachable_get_handler (ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data);
 
 /* FUNC_DEC_START */
@@ -126,7 +131,7 @@ ngx_http_rv2_module = {
 
 
 
-  static ngx_int_t   
+  static ngx_int_t
 ngx_http_rv2_post_conf(ngx_conf_t *cf)
 {
   ngx_http_rv2_main_conf_t      *mcf;
@@ -140,7 +145,7 @@ ngx_http_rv2_post_conf(ngx_conf_t *cf)
 
   ngx_uint_t                     i;
   ngx_uint_t                     j;
-  
+
 
   mcf   = ngx_http_conf_get_module_main_conf(cf, ngx_http_rv2_module);
   usmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_upstream_module);
@@ -189,7 +194,7 @@ ngx_http_rv2_post_conf(ngx_conf_t *cf)
     usnode = ngx_array_get(mcf->uss, i);
 
     logce("to add :%V", &usnode->name);
-    
+
     if (NGX_OK != hash_padd(cf->pool, mcf->us_hash, &usnode->name, (intptr_t)usnode)) {
       logce("failed to add hash element %V", &usnode->name);
       return NGX_ERROR;
@@ -257,7 +262,7 @@ ngx_http_rv2_dec_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
   ngx_str_t                  keyname     = ngx_null_string;
   ngx_str_t                  hash        = ngx_string("crc32");
   ngx_str_t                  hash_key    = ngx_null_string;
-  ngx_str_t                  default_val = ngx_string("NULL");
+  ngx_str_t                  default_val = rv2_default_val;
 
   ngx_uint_t                 i;
   ngx_http_script_compile_t  sc;
@@ -275,7 +280,7 @@ ngx_http_rv2_dec_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
 
   /* 1 required argument : var name */
-  if (NULL != 
+  if (NULL !=
     (res = ngx_http_get_var_name_str(&vals[1], &rv_name))) {
     return res;
   }
@@ -506,20 +511,11 @@ ngx_http_rv2_get_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
   logce("rc name:%V", &rcname);
 
   if (0 < rcname.len) {
-
-    /* TODO */
-    rcv = ngx_http_add_variable(cf, &rcname, NGX_HTTP_VAR_CHANGEABLE);
-    if (NULL == rcv){
+    rvod->rcidx = ngx_http_rv2_add_var(cf, &rcname, &rcv);
+    if (NGX_ERROR == rvod->rcidx) {
       logce("failed to add varaible %V", &rcname);
       return NGX_CONF_ERROR;
     }
-
-    rvod->rcidx = ngx_http_get_variable_index(cf, &rcname);
-
-    if (NGX_CONF_OK != ngx_http_rv2_code_set_gen(cf, rcv)) {
-      return NGX_CONF_ERROR;
-    }
-
   }
   else {
     rvod->rcidx = NGX_CONF_UNSET;
@@ -531,6 +527,9 @@ ngx_http_rv2_get_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     return NGX_CONF_ERROR;
   }
 
+  if (NGX_CONF_UNSET != rvod->rcidx && NGX_CONF_OK != ngx_http_rv2_code_set_gen(cf, rcv)) {
+    return NGX_CONF_ERROR;
+  }
 
   return NGX_CONF_OK;
 }
@@ -545,6 +544,7 @@ ngx_http_rv2_add_var(ngx_conf_t *cf, ngx_str_t *name, ngx_http_variable_t **var)
   v = ngx_http_add_variable(cf, name, NGX_HTTP_VAR_CHANGEABLE);
   if (NULL == v) {
     logce("invalid variable name :%V", name);
+    *var = NULL;
     return NGX_ERROR;
   }
 
@@ -718,7 +718,7 @@ ngx_http_rv2_get_code(ngx_http_script_engine_t *e)
 
   code = (ngx_http_rv2_get_code_t*)e->ip;
   e->ip += sizeof(ngx_http_rv2_get_code_t);
-  
+
   rvod = &code->data;
 
   rv = rvod->rv;
@@ -804,6 +804,19 @@ ngx_http_rv2_get_code(ngx_http_script_engine_t *e)
     e->sp->data = spbuf;
     e->sp->len = vlen;
     ++e->sp;
+
+    /* success return */
+    return;
+  }
+  else if (MEMCACHED_NOTFOUND == rc) {
+    rcs = &rv2_err_notfound;
+    logr("value of the key[%v] is not found", kvv);
+    goto error_return;
+  }
+  else { /* unknow error */
+    rcs = &rv2_err_error;
+    logr("unkown error, errno:%d", errno);
+    goto error_return;
   }
 
 
@@ -813,9 +826,12 @@ ngx_http_rv2_get_code(ngx_http_script_engine_t *e)
 
 
 error_return:
+  logr("error return, rcs:%V", rcs);
+
   if (NULL != val) free(val);
 
   if (NGX_CONF_UNSET != rvod->rcidx) {
+    logr("set rcs");
     e->sp->data = rcs->data;
     e->sp->len = rcs->len;
     ++e->sp;
@@ -851,7 +867,7 @@ ngx_http_rv2_unreachable_get_handler(ngx_http_request_t *r, ngx_http_variable_va
   static ngx_int_t
 ngx_http_rv2_eval_usname(ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t *v)
 {
-  if (NULL == ngx_http_script_run(r, v, rv->us_name_e.lengths->elts, 0, 
+  if (NULL == ngx_http_script_run(r, v, rv->us_name_e.lengths->elts, 0,
         rv->us_name_e.values->elts)) {
     return NGX_ERROR;
   }
