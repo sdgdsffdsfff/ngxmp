@@ -71,11 +71,21 @@
 
 
 /**
- * ngx_array_foreach(a, i) {
- *    some_type *node = ngx_array_get();
+ * some_type *e;
+ * ngx_array_t *a;
+ * ngx_array_foreach(a, e) {
+ *    
  * }
  */
-#define ngx_array_foreach(a, i) for(i = 0; i < (a)->nelts; ++i)
+#define ngx_array_foreach(a, e) for (                                           \
+   (e) = (a)->elts;                                                             \
+   (e) < (a)->elts + (a)->nelts * (a)->size;                                    \
+   (e) = (void*)((u_char*)(e) + (a)->size))
+
+#define ngx_array_foreachi(a, e, i) for (                                       \
+   (e) = (a)->elts, (i) = 0;                                                    \
+   (i) < (a)->nelts;                                                            \
+   ++(i), (e) = ngx_array_get(a, (i)))
 
 
 
