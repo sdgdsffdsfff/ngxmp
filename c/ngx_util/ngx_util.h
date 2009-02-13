@@ -87,6 +87,22 @@
    (i) < (a)->nelts;                                                            \
    ++(i), (e) = ngx_array_get(a, (i)))
 
+#define ngx_array_find(a, e, cond, job)                                         \
+    ngx_array_foreach(a, e) {                                                   \
+      if (cond) {                                                               \
+        job;                                                                    \
+        break;                                                                  \
+      }                                                                         \
+    }
+
+#define ngx_array_findi(a, e, i, cond, job)                                     \
+    ngx_array_foreachi(a, e, i) {                                               \
+      if (cond) {                                                               \
+        job;                                                                    \
+        break;                                                                  \
+      }                                   
+
+
 
 
 
