@@ -1,3 +1,7 @@
+Version 0.1.5
+	09-01-07  	drdr.xp	<drdr.xp@gmail.com>
+		* Added		: upstream set for runtime access
+		* Added		: remote variable ver2
 Version 0.1.4
 	09-01-07  	drdr.xp	<drdr.xp@gmail.com>
 		* Added		: upgrade to nginx-0.6.34
