@@ -23,6 +23,7 @@ Conf_Mod="                              \
   --add-module=${MODULE_empty}          \
   --add-module=${MODULE_repl}           \
   --add-module=${MODULE_rv}             \
+  --add-module=../ngx_http_memcached_more_module             \
   --add-module=../ngx_http_rv2_module             \
   --add-module=${MODULE_vwrite}         \
   --add-module=${MODULE_rand}           \
@@ -56,7 +57,6 @@ cd $NGINX_SRC
 
 # --add-module=${MODULE_mcp} \
 # --add-module=${MODULE_getmc} \
-# --without-http_memcached_module \
 # --with-ld-opt=-lstdc++ \
 # --with-ld-opt=-lmemcache \
 # --without-http_proxy_module	    \
@@ -64,6 +64,7 @@ cd $NGINX_SRC
 ./configure					\
 	$Conf_Mod $Conf_Dbg			\
 	--prefix=$PRE				\
+        --without-http_memcached_module \
 	--without-http_access_module		\
 	--without-http_auth_basic_module	\
 	--without-http_autoindex_module		\
