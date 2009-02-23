@@ -46,16 +46,18 @@ typedef struct {
 }
 ngx_http_rewrite_loc_conf_pseudo_t;
 
-/* TODO remove me */
-typedef enum {
-  RV_SET  = 0,
-  RV_GET,
-  RV_INCR,
-  RV_DECR,
-  RV_UNKNOW
-}
-ngx_http_rv2_op_t;
 
+static rv2_map_cmd_t cmd_map[] =
+{
+  {ngx_string("get")   , RV_GET},
+  {ngx_string("set")   , RV_SET},
+  {ngx_string("incr")  , RV_INCR},
+  {ngx_string("decr")  , RV_DECR},
+  {ngx_string("add")   , RV_ADD},
+  {ngx_string("delete"), RV_DELETE},
+
+  {ngx_null_string, RV_NULL}
+};
 
 
 
@@ -437,6 +439,14 @@ ngx_http_rv2_dec_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
   return NGX_CONF_OK;
 }
 
+/**
+ * get
+ * set
+ * incr
+ * decr
+ * add
+ * delete
+ */
   static char *
 ngx_http_rv2_get_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
@@ -723,25 +733,15 @@ ngx_http_rv2_get_code(ngx_http_script_engine_t *e)
 
   rv = rvod->rv;
 
-  if (NGX_OK != ngx_http_rv2_eval_usname(r, rv, &usname)) {
-    rcs = &rv2_err_invalid_us;
-    logre("evaluating upstream name failed");
 
-    goto error_return;
-  }
-
-  logr("upstream name of rv2:%V", &usname);
-
-
-  us = (ngx_http_rv2_us_node_t*)hash_find(mcf->us_hash, &usname);
-  if (HASH_ISUNSET(us)) {
-    rcs = &rv2_err_nosuch_us;
-    logre("can not find upstream with name :%V", &usname);
-
+  us = rv2_get_us_node(r, rv, &rcs);
+  if (NULL == us) {
     goto error_return;
   }
 
   logr("got upstream : %V", &us->name);
+
+
 
 
   /* get from backend */
@@ -775,8 +775,9 @@ ngx_http_rv2_get_code(ngx_http_script_engine_t *e)
 
   logr("get from memcache : rc=%d", rc);
 
-  if (NULL != val)
+  if (NULL != val) {
     logr("get from memcache : value:%s", val);
+  }
 
 
   if (MEMCACHED_SUCCESS == rc) {
@@ -838,6 +839,7 @@ error_return:
   }
 
 
+  /* TODO default value */
   e->sp->data = (u_char*)"";
   e->sp->len = 0;
   ++e->sp;
@@ -845,6 +847,43 @@ error_return:
   return;
 }
 
+  static ngx_http_rv2_us_node_t *
+rv2_get_us_node(ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t **rcs)
+{
+  ngx_http_rv2_main_conf_t *mcf;
+  ngx_str_t                 usname;
+  ngx_http_rv2_us_node_t   *us;
+
+
+
+  mcf = ngx_http_get_module_main_conf(r, ngx_http_rv2_module);
+
+  if (NGX_OK != ngx_http_rv2_eval_usname(r, rv, &usname)) {
+    *rcs = &rv2_err_invalid_us;
+    logre("evaluating upstream name failed");
+
+    return NULL;
+  }
+
+  logr("upstream name of rv2:%V", &usname);
+
+
+  us = (ngx_http_rv2_us_node_t*)hash_find(mcf->us_hash, &usname);
+  if (HASH_ISUNSET(us)) {
+    *rcs = &rv2_err_nosuch_us;
+    logre("can not find upstream with name :%V", &usname);
+
+    return NULL;
+  }
+
+  logr("got upstream : %V", &us->name);
+
+  return us;
+}
+
+/**
+ * for a variable set by rv2
+ */
   static ngx_int_t
 ngx_http_rv2_unreachable_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v,
     uintptr_t data)

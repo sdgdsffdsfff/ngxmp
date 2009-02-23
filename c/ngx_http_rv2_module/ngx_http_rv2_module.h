@@ -4,6 +4,25 @@
 
 typedef uint32_t (*ngx_http_rv2_hash_func_t)(u_char*, size_t);
 
+typedef enum rv2_op_e {
+  RV_UNKNOWN = 0, 
+  RV_GET, 
+  RV_SET, 
+  RV_INCR, 
+  RV_DECR, 
+  RV_ADD, 
+  RV_DELETE, 
+  RV_NULL
+}
+rv_op_t;
+
+typedef struct rv2_map_cmd_s {
+  ngx_str_t cmd;
+  rv_op_t op;
+
+}
+rv2_map_cmd_t;
+
 typedef struct ngx_http_rv2_mcd_node_s {
   ngx_str_t     addr;
   memcached_st *mc;
