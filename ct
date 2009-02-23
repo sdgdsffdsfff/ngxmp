@@ -28,6 +28,14 @@
 GDB_TUI="-tui"
 MPID=`cat $PREFIX/$FULLNAME/logs/nginx.pid`
 
+ReopenLog()
+{ #{{{
+
+  # wpids=`ps -ef|grep worker|grep $MPID|awk '{print $2}'`
+
+  kill -SIGUSR1 $MPID
+
+} #}}}
 
 InstallConf()
 { #{{{
@@ -48,8 +56,9 @@ Kill()
 Debug()
 { #{{{
 
-  # start debug at 1 worder
-  WPID=`ps -ef | grep $MPID | fgrep -v grep | grep worker | head -n1 | awk '{print $2}'`
+  # start debug at 1st worder
+  # WPID=`ps -ef | grep $MPID | fgrep -v grep | grep worker | head -n1 | awk '{print $2}'`
+  WPID=`pgrep -P $MPID | head -n1`
   gdb $GDB_TUI program $WPID -x gdb.cmd
 
 } #}}}
@@ -65,7 +74,7 @@ Strace()
 { #{{{
 
   while [ 1 ]; do
-    WPID=`ps -ef | grep $MPID | fgrep -v grep | grep worker | awk '{print $2}'`
+    WPID=`pgrep -P $MPID | head -n1`
     echo $WPID
     # strace -v -e trace=writev -e write=6 -p $WPID
     strace -v -p $WPID
@@ -113,7 +122,11 @@ Start()
 
 
 case $1 in 
-  "mk")
+  rlog|reopenlog)
+    ReopenLog
+  ;;
+
+  mk|make)
     make
   ;;
 
@@ -133,7 +146,7 @@ case $1 in
     echo nothing done
   ;;
 
-  "rest") 
+  r|restart) 
     make
     Kill
     InstallConf
@@ -144,11 +157,11 @@ case $1 in
     Debug
   ;;
 
-  "gm")
+  gm|gdbmain)
     DebugMain
   ;;
 
-  "st")
+  st|strace)
     Strace
   ;;
 
@@ -158,7 +171,7 @@ case $1 in
 
   *)
     echo Usage : 
-    echo "   " $0 "[mk|up|down|rest|gdb|st|stdown]"
+    echo "   " $0 "[mk|make] [up] [down] [r|restart] [gdb] [gm|gdbmain] [st|strace] [stdown]"
   ;;
 esac
 

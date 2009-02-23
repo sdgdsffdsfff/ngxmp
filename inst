@@ -15,7 +15,6 @@ MODULE_time=../ngx_http_time_module
 MODULE_list=../ngx_http_list_module
 MODULE_av=../ngx_http_arrayv_module
 
-# --add-module=${MODULE_rv2}		\
 # --add-module=../ngx_http_usset_module \
 
 Conf_Mod="                              \
