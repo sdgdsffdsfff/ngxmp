@@ -59,6 +59,7 @@
     __return(min(c, e));                                                        \
 })
 
+/* use snprintf instead */
 #define bufprintf(n,buf,fmt...)                                                 \
   do{                                                                           \
     (n) = sprintf((char*)(buf)->last,fmt);                                      \
@@ -68,6 +69,13 @@
   }while(0)
 
 #define ngx_array_get(a,n) ((void*)&((char*)((a)->elts))[n * (a)->size])
+
+#define stack_push(s, vv)                                                       \
+    ({                                                                          \
+        (s)->data = (vv)->data;                                                   \
+        (s)->len = (vv)->len;                                                     \
+        ++(s);                                                                  \
+    })
 
 
 /**

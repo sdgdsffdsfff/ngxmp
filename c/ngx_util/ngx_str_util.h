@@ -8,11 +8,16 @@
 
 #define str_buf(s, size) ngx_str_buf(s, size)
 
+#define ngx_str_pbuf(s, p, size)                                                \
+    ngx_str_t (s) = {(size), NULL};                                               \
+    (s).data = ngx_palloc((p), (size));
+
+
 /**
  * alloc string in pool, return the data pointer.
  * return NULL for failure
  */
-#define str_palloc(s, pool, size) ({                                          \
+#define str_palloc(s, pool, size) ({                                            \
   (s)->data = ngx_palloc((pool), (size));                                       \
   (s)->len = (size);                                                            \
   __return((s)->data);                                                          \

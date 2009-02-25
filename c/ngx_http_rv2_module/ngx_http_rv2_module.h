@@ -69,9 +69,13 @@ ngx_http_rv2_t;
 
 
 typedef struct {
-  ngx_int_t       vidx;
-  ngx_int_t       rcidx;
-  ngx_http_rv2_t *rv;
+  ngx_http_rv2_t      *rv;
+
+  rv_op_t              optype;
+  ngx_int_t            vidx;      /* varaible storing value       */
+  ngx_int_t            rcidx;     /* variable storing return code */
+
+  ngx_http_rv2_eval_t  v2set_e;   /* valule to set/add/incr/decr  */
 }
 ngx_http_rv2_op_data_t;
 
@@ -79,7 +83,13 @@ typedef struct {
   ngx_http_script_code_pt code;
   ngx_http_rv2_op_data_t  data;
 }
-ngx_http_rv2_get_code_t;
+ngx_http_rv2_getter_code_t;
+
+typedef struct {
+  ngx_http_script_code_pt code;
+  ngx_http_rv2_op_data_t  data;
+}
+ngx_http_rv2_setter_code_t;
 
 
 
@@ -97,11 +107,13 @@ static const ngx_str_t rv2_default_val  = ngx_string("NULL");
 static ngx_str_t rv2_err_success        = ngx_string("success");
 static ngx_str_t rv2_err_notfound       = ngx_string("notfound");
 static ngx_str_t rv2_err_error          = ngx_string("error");
+static ngx_str_t rv2_err_connection     = ngx_string("connection");
 static ngx_str_t rv2_err_invalid_us     = ngx_string("invalid_us");
 static ngx_str_t rv2_err_nosuch_us      = ngx_string("nosuch_us");
 static ngx_str_t rv2_err_internal       = ngx_string("internal");
 static ngx_str_t rv2_err_hashkey        = ngx_string("hashkey");
 static ngx_str_t rv2_err_key            = ngx_string("key");
+static ngx_str_t rv2_err_invalid_val    = ngx_string("invalid_val");
 
 
 ngx_http_rv2_t *ngx_http_rv2_find (ngx_conf_t *cf, ngx_str_t *name);
