@@ -104,16 +104,17 @@ static const ngx_str_t hash_5381        = ngx_string("5381");
 
 static const ngx_str_t rv2_default_val  = ngx_string("NULL");
 
-static ngx_str_t rv2_err_success        = ngx_string("success");
-static ngx_str_t rv2_err_notfound       = ngx_string("notfound");
-static ngx_str_t rv2_err_error          = ngx_string("error");
-static ngx_str_t rv2_err_connection     = ngx_string("connection");
-static ngx_str_t rv2_err_invalid_us     = ngx_string("invalid_us");
-static ngx_str_t rv2_err_nosuch_us      = ngx_string("nosuch_us");
-static ngx_str_t rv2_err_internal       = ngx_string("internal");
-static ngx_str_t rv2_err_hashkey        = ngx_string("hashkey");
-static ngx_str_t rv2_err_key            = ngx_string("key");
-static ngx_str_t rv2_err_invalid_val    = ngx_string("invalid_val");
+static ngx_str_t rv2_err_success        = ngx_string("SUCCESS");
+static ngx_str_t rv2_err_notfound       = ngx_string("NOTFOUND");
+static ngx_str_t rv2_err_notstored      = ngx_string("NOTSTORED");
+static ngx_str_t rv2_err_error          = ngx_string("ERROR");
+static ngx_str_t rv2_err_connection     = ngx_string("CONNECTION");
+static ngx_str_t rv2_err_invalid_us     = ngx_string("INVALID_US");
+static ngx_str_t rv2_err_nosuch_us      = ngx_string("NOSUCH_US");
+static ngx_str_t rv2_err_internal       = ngx_string("INTERNAL");
+static ngx_str_t rv2_err_hashkey        = ngx_string("HASHKEY");
+static ngx_str_t rv2_err_key            = ngx_string("KEY");
+static ngx_str_t rv2_err_invalid_val    = ngx_string("INVALID_VAL");
 
 
 ngx_http_rv2_t *ngx_http_rv2_find (ngx_conf_t *cf, ngx_str_t *name);

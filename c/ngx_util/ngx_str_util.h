@@ -24,7 +24,7 @@
 })
 
 
-#define str_shift(s, size) do {                                                 \
+#define str_shift(s, size) ({                                                 \
     if ((s)->len >= (size)) {                                                   \
       (s)->data += (size);                                                      \
       (s)->len -= (size);                                                       \
@@ -33,7 +33,8 @@
       (s)->data = NULL;                                                         \
       (s)->len = 0;                                                             \
     }                                                                           \
-  } while(0)
+    (s)->data;                                                                  \
+  })
 
 
 #define strpr(s)  s.data, s.len

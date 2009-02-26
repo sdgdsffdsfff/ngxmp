@@ -111,9 +111,9 @@ hash_find(hash_t *hash, ngx_str_t *name)
     return HASH_VAL_UNSET;
   }
 
-  if (NULL == elt->next) {
-    return elt->val;
-  }
+  /* if (NULL == elt->next) { */
+    /* return elt->val; */
+  /* } */
 
   for(;elt && !ngx_str_eq(name, &elt->name);elt = elt->next);
 

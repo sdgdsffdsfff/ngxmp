@@ -3,5 +3,7 @@ break _ngx_http_script_run
 break _ngx_http_send_header
 break _ngx_http_write_filter
 break _ngx_http_script_complex_value_code
+break _ngx_http_script_run
 
-break ngx_http_script_run
+rem  break ngx_http_rewrite_module.c:178
+break ngx_http_rv2_code_set_gen
