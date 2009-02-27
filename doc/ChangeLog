@@ -1,3 +1,8 @@
+Version 0.2.0
+	09-02-27  	drdr.xp	<drdr.xp@gmail.com>
+		* Added		: remote variable 2
+	09-02-27  	zhangyu <>
+		* Added		: array operations at rewrite phase
 Version 0.1.5
 	09-01-07  	drdr.xp	<drdr.xp@gmail.com>
 		* Added		: upstream set for runtime access

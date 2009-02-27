@@ -9,26 +9,23 @@ MODULE_hash=../nginx_upstream_hash-0.2
 MODULE_empty=../ngx_http_empty_module
 MODULE_repl=../ngx_http_repl_module
 MODULE_rv=../ngx_http_rv_module
-MODULE_vwrite=../ngx_http_vwrite_module
 MODULE_rand=../ngx_http_rand_module
-MODULE_time=../ngx_http_time_module
 MODULE_list=../ngx_http_list_module
-MODULE_av=../ngx_http_arrayv_module
 
 # --add-module=../ngx_http_usset_module \
 
-Conf_Mod="                              \
-  --add-module=${MODULE_hash}           \
-  --add-module=${MODULE_empty}          \
-  --add-module=${MODULE_repl}           \
-  --add-module=${MODULE_rv}             \
-  --add-module=../ngx_http_memcached_more_module             \
-  --add-module=../ngx_http_rv2_module             \
-  --add-module=${MODULE_vwrite}         \
-  --add-module=${MODULE_rand}           \
-  --add-module=${MODULE_time}           \
-  --add-module=${MODULE_list}           \
-  --add-module=${MODULE_av}             \
+Conf_Mod="                                       \
+  --add-module=${MODULE_hash}                    \
+  --add-module=${MODULE_empty}                   \
+  --add-module=../ngx_http_memcached_more_module \
+  --add-module=../ngx_http_rv2_module            \
+  --add-module=../ngx_http_vwrite_module         \
+  --add-module=../ngx_http_time_module           \
+  --add-module=../ngx_http_arrayv_module         \
+  --add-module=${MODULE_repl}                    \
+  --add-module=${MODULE_rv}                      \
+  --add-module=${MODULE_rand}                    \
+  --add-module=${MODULE_list}                    \
 "
 
 Conf_Dbg="\
@@ -60,30 +57,31 @@ cd $NGINX_SRC
 # --with-ld-opt=-lmemcache \
 # --without-http_proxy_module	    \
 # --with-cc-opt=-g 			 \
-./configure					\
-	$Conf_Mod $Conf_Dbg			\
-	--prefix=$PRE				\
-        --without-http_memcached_module \
-	--without-http_access_module		\
-	--without-http_auth_basic_module	\
-	--without-http_autoindex_module		\
-	--without-http_browser_module		\
-	--without-http_charset_module		\
-	--without-http_empty_gif_module		\
-	--without-http_fastcgi_module		\
-	--without-http_geo_module		\
-	--without-http_gzip_module		\
-	--without-http_limit_zone_module	\
-	--without-http_map_module		\
-	--without-http_referer_module		\
-	--without-http_upstream_ip_hash_module	\
-	--without-http_userid_module		\
-	--without-mail_imap_module		\
-	--without-mail_pop3_module		\
-	--without-mail_smtp_module		\
-	--without-poll_module			\
-	--without-select_module			\
-	--sbin-path=sbin/$FULLNAME
+./configure                                    \
+        $Conf_Mod                              \
+        $Conf_Dbg                              \
+        --prefix=$PRE                          \
+        --without-http_memcached_module        \
+        --without-http_access_module           \
+        --without-http_auth_basic_module       \
+        --without-http_autoindex_module        \
+        --without-http_browser_module          \
+        --without-http_charset_module          \
+        --without-http_empty_gif_module        \
+        --without-http_fastcgi_module          \
+        --without-http_geo_module              \
+        --without-http_gzip_module             \
+        --without-http_limit_zone_module       \
+        --without-http_map_module              \
+        --without-http_referer_module          \
+        --without-http_upstream_ip_hash_module \
+        --without-http_userid_module           \
+        --without-mail_imap_module             \
+        --without-mail_pop3_module             \
+        --without-mail_smtp_module             \
+        --without-poll_module                  \
+        --without-select_module                \
+        --sbin-path=sbin/$FULLNAME
 
 make install
 

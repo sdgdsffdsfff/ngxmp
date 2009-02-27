@@ -3,7 +3,7 @@ CONFIGUE
 ::
 
   edit ./conf
-  please take a guess on these variables. : |
+  take guess on the keys. : |
 
 
 INSTALL
@@ -11,6 +11,8 @@ INSTALL
 ::
 
   ./inst
+  define which module to add here.
+
 
 
 CONTROL
