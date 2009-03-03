@@ -255,12 +255,10 @@ ngx_http_upstream_hash_crc32_short(u_char *data, size_t len)
 static ngx_uint_t
 ngx_http_upstream_hash_5381(u_char *data, size_t len)
 {
-  TRACE("data, len : %s, %d", data, len);
   ngx_uint_t hash = 5381; 
   while(len--) {
     hash += (hash<<5) + *data++;
   }
-  TRACE("hash value : %x", hash);
   return hash & 0x7fff;
 }
 

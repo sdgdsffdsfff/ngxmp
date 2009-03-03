@@ -600,7 +600,7 @@ ngx_http_rv_set_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uin
         return;
       }
 
-      mcv_vv->len = sprintf((char*)buf, "%d", rc);
+      mcv_vv->len = sprintf((char*)buf, "%ld", rc);
       mcv_vv->data = buf;
       mcv_vv->valid = 1;
       mcv_vv->not_found = 0;
@@ -615,7 +615,7 @@ ngx_http_rv_set_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uin
       d = d < 0 ? 0 : d;
       op = RV_SET;
 
-      rc = sprintf((char*)val, "%d", d);
+      rc = sprintf((char*)val, "%ld", d);
       val[rc] = 0;
       v->data = val;
       v->len = rc;

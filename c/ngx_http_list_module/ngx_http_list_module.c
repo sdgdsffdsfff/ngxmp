@@ -200,8 +200,8 @@ ngx_http_listitem_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *
     goto empty;
   }
 
-  TRACE("start at [%d]/[%d]", i, raw->len);
-  TRACE("wanted:[%d]", ii);
+  TRACE("start at [%ld]/[%ld]", i, raw->len);
+  TRACE("wanted:[%ld]", ii);
   for (j=0; i<raw->len ;++j)
   {
     v->data = &raw->data[i];

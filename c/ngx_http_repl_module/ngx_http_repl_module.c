@@ -337,7 +337,7 @@ ngx_http_repl_handler(ngx_http_request_t* r)
   TRACE("what to output:%s", out_buf);
 
   res_code =  ngx_http_output_filter(r, out_chain);
-  TRACE("res_code is : %d", res_code);
+  /* TRACE("res_code is : %d", res_code); */
   return res_code;
 
 error_out:

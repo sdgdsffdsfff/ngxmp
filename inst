@@ -58,12 +58,12 @@ cd $NGINX_SRC
 # --with-ld-opt=-lmemcache \
 # --without-http_proxy_module	    \
 # --with-cc-opt=-g 			 \
+# --without-http_autoindex_module		\
 ./configure					\
 	$Conf_Mod $Conf_Dbg			\
 	--prefix=$PRE				\
 	--without-http_access_module		\
 	--without-http_auth_basic_module	\
-	--without-http_autoindex_module		\
 	--without-http_browser_module		\
 	--without-http_charset_module		\
 	--without-http_empty_gif_module		\

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DEBUG=1
+DEBUG=0
 
 PubVer=release
 if [ 1 -eq $DEBUG ];then
