@@ -5,8 +5,11 @@
 
                                                                    version : 0.1
                                                                            by xp 
-                                                         yanbo@staff.sina.com.cn
-                                                               drdr.xp@gmail.com
+                                                       <yanbo@staff.sina.com.cn>
+                                                             <drdr.xp@gmail.com>
+                                                                         zhangyu
+                                                                              <>
+
 
 This is an easy to use and configurable http to mc-protocal proxy utilizing SSI
 module & modified memcached module.

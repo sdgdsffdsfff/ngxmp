@@ -6,7 +6,6 @@
 
 #define __return(s) (s)
 
-#include "ngx_str_util.h"
 
 
 #define UUID_LEN 37
@@ -28,6 +27,7 @@
 /* conf log */
 #define logc(fmt ...)  ngx_conf_log_error(NGX_LOG_DEBUG, cf, 0, LOG_PREFIX fmt)
 #define logce(fmt ...) ngx_conf_log_error(NGX_LOG_ERR, cf, 0, LOG_PREFIX fmt)
+
 
 /* cycle log */
 #define logy(fmt ...)  ngx_log_error(NGX_LOG_DEBUG, cycle->log, 0, LOG_PREFIX fmt)
@@ -59,6 +59,7 @@
     __return(min(c, e));                                                        \
 })
 
+/* use snprintf instead */
 #define bufprintf(n,buf,fmt...)                                                 \
   do{                                                                           \
     (n) = sprintf((char*)(buf)->last,fmt);                                      \
@@ -67,7 +68,47 @@
     *(buf)->last = 0;                                                           \
   }while(0)
 
-#define ngx_array_get(a,n) (&((char*)((a)->elts))[n * (a)->size])
+#define ngx_array_get(a,n) ((void*)&((char*)((a)->elts))[n * (a)->size])
+
+#define stack_push(s, vv)                                                       \
+    ({                                                                          \
+        (s)->data = (vv)->data;                                                   \
+        (s)->len = (vv)->len;                                                     \
+        ++(s);                                                                  \
+    })
+
+
+/**
+ * some_type *e;
+ * ngx_array_t *a;
+ * ngx_array_foreach(a, e) {
+ *    
+ * }
+ */
+#define ngx_array_foreach(a, e) for (                                           \
+   (e) = (a)->elts;                                                             \
+   (e) < (a)->elts + (a)->nelts * (a)->size;                                    \
+   (e) = (void*)((u_char*)(e) + (a)->size))
+
+#define ngx_array_foreachi(a, e, i) for (                                       \
+   (e) = (a)->elts, (i) = 0;                                                    \
+   (i) < (a)->nelts;                                                            \
+   ++(i), (e) = ngx_array_get(a, (i)))
+
+#define ngx_array_find(a, e, cond, job)                                         \
+    ngx_array_foreach(a, e) {                                                   \
+      if (cond) {                                                               \
+        job;                                                                    \
+        break;                                                                  \
+      }                                                                         \
+    }
+
+#define ngx_array_findi(a, e, i, cond, job)                                     \
+    ngx_array_foreachi(a, e, i) {                                               \
+      if (cond) {                                                               \
+        job;                                                                    \
+        break;                                                                  \
+      }                                   
 
 
 
@@ -185,6 +226,10 @@
 
 #define buf_len(b) ((b)->last - (b)->pos)
 
+#include "ngx_str_util.h"
+#include "ngx_hash_util.h"
+#include "ngx_debug_util.h"
+#include "ngx_memcached_util.h"
 
 #ifndef __UTIL_WITHOUT_FUNC__
 
@@ -194,6 +239,7 @@
 ngx_http_get_var_name_str(ngx_str_t *v, ngx_str_t *n)
 {
   if ('$' != v->data[0]) {
+    fprintf(stderr, "%.*s", strpp(v));
     return (char*)"found invalid variable name";
   }
   n->data = v->data + 1;

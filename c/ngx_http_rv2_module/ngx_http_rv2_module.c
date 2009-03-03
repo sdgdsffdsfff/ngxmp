@@ -1,25 +1,25 @@
 /**
- * TODO add check_mdb to other query too
- * TODO duplicate remote variable check
- * TODO crc32 support only for now.
- */
-
-/**
- * rv_dec $varname_var 
- *        upstream="us_name_expr"             # optional default ${varname_var}_us
- *        key=$keyname_var                    # optional default ${varname_var}_key
- *        hash=hash_method_str                # optional default crc32
- *        hash_key=$hash_key_var              # optional default $varname_var
- *        default_val="expr";                 # optional default $varname_var
+ * TODO default value
+ *
+ * rv_dec $varname_var
+ *        upstream="us_name_expr"             # optional   default = ${varname_var}_us
+ *        key=$keyname_var                    # optional   default = ${varname_var}_key
+ *        hash=hash_method_str                # optional   default = crc32
+ *        hash_key=$hash_key_var              # optional   default = $keyname
+ *        default="expr";                     # optional   default = $varname_var
  *
  *
  * rv_timeout_read varname timeout;
  *
- * rv_get $value $varname $rc;
- * rv_set $rv "$value" $rc;
- * rv_incr $value "$value" $rc;
- * rv_decr $value "$value" $rc;
- * rv_delete $varname $rc;
+ * rv_get $value $varname $rc;                # rc is optional, value can be
+ *    [success|timeout|notfound|invalid_us|nosuch_us|internal|error|connection]
+ *
+ * rv_set    	     $rv "$value" $rc;
+ * rv_incr   $newval $rv "$value" $rc;
+ * rv_decr   $newval $rv "$value" $rc;
+ * rv_add            $rv "$value" $rc;
+ * rv_delete         $rv          $rc;
+ * rv_replace        $rv "$value" $rc;
  *
  */
 #include <ngx_config.h>
@@ -27,106 +27,76 @@
 #include <ngx_http.h>
 
 #include <libmemcached/memcached.h>
+
 #include "ngx_util.h"
+#include "ngx_http_rv2_module.h"
+
 
 #define THIS  ngx_http_rv2_module
 
 #define mcf_t ngx_http_rv2_main_conf_t
 #define lcf_t ngx_http_rv2_loc_conf_t
-#define rv_t ngx_http_rv2_var_t
 
 #define rMCF() ngx_http_get_module_main_conf(r,THIS)
 #define rLCF() ngx_http_get_module_loc_conf(r,THIS)
 
-typedef enum {
-  RV_SET  = 0, 
-  RV_INCR, 
-  RV_DECR, 
-  RV_UNKNOW
-} 
-ngx_http_rv2_op_t;
 
+#define RV2_INT_VAL_LEN 32
 
-typedef struct memcached_st memcached_t;
-
+/* that is bad  */
 typedef struct {
-  ngx_array_t *rvs;      /* ngx_http_rv2_var_t* */
+  ngx_array_t  *codes;        /* uintptr_t */
 }
-ngx_http_rv2_main_conf_t;
+ngx_http_rewrite_loc_conf_pseudo_t;
 
-typedef uint32_t (*ngx_http_rv2_hash_func_t)(u_char*, size_t);
 
-typedef struct {
-  ngx_str_t name;
+static rv2_map_cmd_t cmd_map[] =
+{
+  {ngx_string("get")   , RV_GET},
+  {ngx_string("set")   , RV_SET},
+  {ngx_string("incr")  , RV_INCR},
+  {ngx_string("decr")  , RV_DECR},
+  {ngx_string("add")   , RV_ADD},
+  {ngx_string("delete"), RV_DELETE},
 
-  ngx_int_t us_name_idx;
-
-  ngx_str_t hash_str;
-  ngx_int_t hash_type;
-  ngx_http_rv2_hash_func_t *hash_func;
-
-  ngx_int_t hash_key_idx;
-
-  ngx_str_t default_val;
-
-  /* TODO time outs */
-
-  /* TODO rc */
+  {ngx_null_string, RV_NULL}
+};
 
 
 
-  /* ngx_str_t                     us_name;        |+ upstream name  +| */
-
-  /* ngx_int_t                     us_index;       |+ upstream index +| */
-  /* ngx_http_upstream_srv_conf_t *us; */
-
-  /* ngx_array_t                  *mc_addrs; */
-  /* ngx_array_t                  *mcs;            |+ memcache_t  +| */
-
-  /* ngx_int_t                     mck_index; */
-  /* ngx_int_t                     mcv_index; */
-
-  /* ngx_int_t                     hashkey_index;  |+ which varaible to use as hash string +| */
-
-  /* void                         *hash_method;    |+ not used yet for now +| */
-   /* */
-
-  /* ngx_int_t                     op;             |+ operation type [set|incr|decr] +| */
-  /* ngx_int_t                     v0;             |+ default value for incr/decr +| */
-}
-ngx_http_rv2_var_t;
-
-
-static void      *ngx_http_create_main_conf      (ngx_conf_t *cf);
-static char      *ngx_http_init_main_conf        (ngx_conf_t *cf, void *conf);
-static ngx_int_t  ngx_http_rv2_init_proc         (ngx_cycle_t *cycle);
-static void       ngx_http_rv2_exit              (ngx_cycle_t *cycle);
+static void                    *ngx_http_rv2_create_main_conf (ngx_conf_t *cf);
+static char                    *ngx_http_rv2_init_main_conf (ngx_conf_t *cf, void *conf);
+static ngx_int_t                ngx_http_rv2_post_conf (ngx_conf_t *cf);
+static ngx_int_t                ngx_http_rv2_init_proc (ngx_cycle_t *cycle);
  
-static char      *ngx_http_rv2_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-static char      *ngx_http_rv2_hash_key_command  (ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
-static ngx_int_t  ngx_http_rv2_post_conf         (ngx_conf_t *cf);
+static char                    *ngx_http_rv2_dec_command (ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static char                    *ngx_http_rv2_getter_command (ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
  
-static ngx_int_t  ngx_http_rv2_init_var_mc       (ngx_conf_t *cf, ngx_http_variable_t *v);
-static ngx_int_t  ngx_http_rv2_connet_mc         (ngx_cycle_t *cycle, ngx_array_t **mcs, ngx_array_t *addrs /* ngx_str_t */);
+static void                     ngx_http_rv2_getter_code (ngx_http_script_engine_t *e);
+static char                    *ngx_http_rv2_code_set_gen (ngx_conf_t *cf, ngx_http_variable_t *v);
+ 
+ 
+static ngx_int_t                ngx_http_rv2_eval_usname (ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t *v);
+ 
+static ngx_int_t                ngx_http_rv2_add_var (ngx_conf_t *cf, ngx_str_t *name, ngx_http_variable_t **var);
+static ngx_int_t                ngx_http_rv2_unreachable_get_handler (ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data);
+ 
+static ngx_http_rv2_mcd_node_t *rv2_get_mcd_node (ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_http_rv2_us_node_t *us, ngx_str_t **rcs);
+static ngx_http_rv2_us_node_t  *rv2_get_us_node (ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t **rcs);
+static char                    *ngx_http_rv2_setter_command (ngx_conf_t *cf, ngx_command_t *cmd, void *conf);
+static ngx_int_t                ngx_http_rv2_eval_default_value (ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t *v);
+ 
+static memcached_st            *rv2_get_mcd (ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t **rcs);
+static ngx_int_t                rv2_add_default_value (ngx_http_script_engine_t *e, ngx_http_rv2_op_data_t *rvop, memcached_st *mcd, ngx_http_variable_value_t *kvv, ngx_int_t d, ngx_str_t **rcs);
+static ngx_int_t                rv2_push_i (ngx_http_script_engine_t *e, ngx_http_rv2_op_data_t *rvop, ngx_int_t ival, ngx_str_t **rcs);
+static ngx_int_t                rv2_push_str (ngx_http_script_engine_t *e, ngx_http_rv2_op_data_t *rvop, ngx_str_t *v, ngx_str_t **rcs);
+static rv_op_t                  rv2_get_cmd_type (ngx_conf_t *cf, ngx_str_t *cmd);
+static void                     ngx_http_rv2_setter_code (ngx_http_script_engine_t *e);
+/* FUNC_DEC_START */
+/* FUNC_DEC_END */
 
 
-
-#define HASH_CRC32         0x01
-#define HASH_CRC32_SHORT   0x02
-#define HASH_5381          0x03
-
-
-
-
-static const ngx_str_t rv_op_incr = ngx_string("incr");
-static const ngx_str_t rv_op_decr = ngx_string("decr");
-
-
-static const ngx_str_t hash_crc32 = ngx_string("crc32");
-static const ngx_str_t hash_crc32_short = ngx_string("crc32_short");
-static const ngx_str_t hash_5381 = ngx_string("5381");
-
-
+extern ngx_module_t  ngx_http_rewrite_module;
 
 
 static ngx_command_t
@@ -134,12 +104,32 @@ ngx_http_rv2_commands[] = {
 
   { ngx_string("rv_dec"),
     NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_1MORE,
-    ngx_http_rv2_remote_var_command,
+    ngx_http_rv2_dec_command,
     NGX_HTTP_LOC_CONF_OFFSET, 0, NULL },
 
-  { ngx_string("rv_hash_key"),
-    NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_TAKE2,
-    ngx_http_rv2_hash_key_command,
+  { ngx_string("rv_get"),
+    NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_2MORE,
+    ngx_http_rv2_getter_command,
+    NGX_HTTP_LOC_CONF_OFFSET, 0, NULL },
+
+  { ngx_string("rv_incr"),
+    NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_2MORE,
+    ngx_http_rv2_setter_command,
+    NGX_HTTP_LOC_CONF_OFFSET, 0, NULL },
+
+  { ngx_string("rv_decr"),
+    NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_2MORE,
+    ngx_http_rv2_setter_command,
+    NGX_HTTP_LOC_CONF_OFFSET, 0, NULL },
+
+  { ngx_string("rv_add"),
+    NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_1MORE,
+    ngx_http_rv2_setter_command,
+    NGX_HTTP_LOC_CONF_OFFSET, 0, NULL },
+
+  { ngx_string("rv_delete"),
+    NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_1MORE,
+    ngx_http_rv2_setter_command,
     NGX_HTTP_LOC_CONF_OFFSET, 0, NULL },
 
   ngx_null_command
@@ -148,9 +138,9 @@ ngx_http_rv2_commands[] = {
 static ngx_http_module_t
 ngx_http_rv2_module_ctx = {
   NULL,                                         /* preconfiguration */
-  ngx_http_rv2_post_conf,                        /* postconfiguration */
-  ngx_http_create_main_conf,                    /* create main configuration */
-  ngx_http_init_main_conf,                      /* init main configuration */
+  ngx_http_rv2_post_conf,                       /* postconfiguration */
+  ngx_http_rv2_create_main_conf,                    /* create main configuration */
+  ngx_http_rv2_init_main_conf,                      /* init main configuration */
   NULL,                                         /* create server configuration */
   NULL,                                         /* merge server configuration */
   NULL,                                         /* create location configuration */
@@ -160,611 +150,162 @@ ngx_http_rv2_module_ctx = {
 ngx_module_t
 ngx_http_rv2_module = {
   NGX_MODULE_V1,
-  &ngx_http_rv2_module_ctx,                      /* module context */
-  ngx_http_rv2_commands,                         /* module directives */
+  &ngx_http_rv2_module_ctx,                     /* module context */
+  ngx_http_rv2_commands,                        /* module directives */
   NGX_HTTP_MODULE,                              /* module type */
   NULL,                                         /* init master */
   NULL,                                         /* init module */
-  ngx_http_rv2_init_proc,                        /* init process */
+  ngx_http_rv2_init_proc,                       /* init process */
   NULL,                                         /* init thread */
   NULL,                                         /* exit thread */
-  ngx_http_rv2_exit,                             /* exit process */
+  NULL,                            /* exit process */
   NULL,                                         /* exit master */
   NGX_MODULE_V1_PADDING
 };
 
 
-  static ngx_int_t   
-ngx_http_rv2_post_conf(ngx_conf_t *cf)
-{
-  fSTEP;
-
-  ngx_http_rv2_main_conf_t   *mcf;
-  ngx_http_core_main_conf_t *cmcf;
-
-  ngx_http_variable_t       *v;
-  ngx_int_t                  rvn;
-  ngx_http_variable_t                 **rvip;
-  ngx_http_variable_t                  *rvi;
-
-  ngx_int_t                  i;
-  ngx_int_t                  rc;
-  
-
-  mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_rv2_module);
-  cmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
 
 
-  rvip = mcf->rvs->elts;
-  rvn = mcf->rvs->nelts;
-
-  for (i= 0; i < rvn; ++i){
-
-    rvi = rvip[i];
-
-    v = rvi;
-
-    /* logc("initialize remote variable [%V] ", &v->name); */
-
-    rc = ngx_http_rv2_init_var_mc(cf, v);
-    if (NGX_OK != rc){
-      return rc;
-    }
-
-  }
-
-  return NGX_OK;
-}
 
   static ngx_int_t
-ngx_http_rv2_init_var_mc(ngx_conf_t *cf, ngx_http_variable_t *v)
+ngx_http_rv2_post_conf(ngx_conf_t *cf)
 {
-  fSTEP;
+  ngx_http_rv2_main_conf_t      *mcf;
+  ngx_http_upstream_main_conf_t *usmcf;
 
-  ngx_http_rv2_var_t             *ctx;
-  ngx_str_t                      *vus;
+  ngx_http_upstream_srv_conf_t  *usscf;
+  ngx_http_upstream_server_t    *srv;
 
-  ngx_http_upstream_main_conf_t  *usmcf;
-  ngx_http_upstream_srv_conf_t  **usscf;
-  ngx_int_t                       usn;
+  ngx_http_rv2_us_node_t        *usnode;
+  ngx_http_rv2_mcd_node_t       *mcdnode;
 
-  ngx_http_upstream_srv_conf_t   *ucf;
-  ngx_str_t                      *usname;
-
-  ngx_http_upstream_server_t     *srv;
-  ngx_int_t                       srvn;
-  ngx_str_t                      *srv_addr;
-
-  ngx_str_t                      *mca;
-
-  ngx_int_t                       i;
-  ngx_int_t                       j;
+  ngx_uint_t                     i;
+  ngx_uint_t                     j;
 
 
+  mcf   = ngx_http_conf_get_module_main_conf(cf, ngx_http_rv2_module);
+  usmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_upstream_module);
 
 
-  ctx = (ngx_http_rv2_var_t*)v->data;
-  vus = &ctx->us_name;
-
-  if (0 == vus->len) {
-    logce("remote variable [%V] did not specify any upstream to use", &v->name);
+  mcf->uss = ngx_array_create(cf->pool, usmcf->upstreams.nelts, sizeof(ngx_http_rv2_us_node_t));
+  if (NULL == mcf->uss) {
+    logce("failed to allocate");
     return NGX_ERROR;
   }
 
-  /* logc("init mc address of [%V] which needs upstream [%V], v.ctx:[%p]", &v->name, vus, ctx); */
 
+  for (i= 0; i < usmcf->upstreams.nelts; ++i){
+    usscf = *(ngx_http_upstream_srv_conf_t**)(ngx_array_get(&usmcf->upstreams, i));
+    usnode = ngx_array_push(mcf->uss);
 
-  usmcf = (ngx_http_upstream_main_conf_t*)
-    ngx_http_conf_get_module_main_conf(cf, ngx_http_upstream_module);
+    usnode->name = usscf->host;
+    logc("upstream %V added", &usnode->name);
 
-  usscf = usmcf->upstreams.elts;
-  usn   = usmcf->upstreams.nelts;
-
-  /* logc("upstream number:%d", usn); */
-
-  for (i= 0; i < usn; ++i){
-    ucf = usscf[i];
-    usname = &ucf->host;
-    /* logc("us host:[%V]", usname); */
-
-    if (vus->len != usname->len 
-      || 0 != ngx_strncmp(vus->data, usname->data, vus->len)) { continue; }
-
-    /* logc("RV[%V] uses upstream : [%V]", &v->name, usname); */
-
-    srvn = ucf->servers->nelts;
-    srv  = ucf->servers->elts;
-
-    ctx->mc_addrs = ngx_array_create(cf->pool, srvn, sizeof(ngx_str_t));
-    if (NULL == ctx->mc_addrs) {
-      logce("create array of mc addresses failed");
+    usnode->mcd_array = ngx_array_create(cf->pool, usscf->servers->nelts, sizeof(ngx_http_rv2_mcd_node_t));
+    if (NULL == usnode->mcd_array) {
+      logce("failed to allocate");
       return NGX_ERROR;
     }
 
 
-    for (j= 0; j < srvn; ++j){
+    for (j= 0; j < usscf->servers->nelts; ++j){
+      srv = ngx_array_get(usscf->servers, j);
 
-      srv_addr = &srv[j].addrs->name;
+      mcdnode = ngx_array_push(usnode->mcd_array);
+      mcdnode->addr = srv->addrs->name;
 
-      mca = ngx_array_push(ctx->mc_addrs);
-      if (NULL == mca){
-        return NGX_ERROR;
-      }
-
-
-      *mca = *srv_addr;
-
-      /* logc("    added server addr:port[%V]", srv_addr); */
+      logc(" server %V added", &mcdnode->addr);
     }
-
-    return NGX_OK;
   }
 
-  logce("could not find upstream with name [%V] for remote variable [%V]", vus, &v->name);
 
-  return NGX_ERROR;
+
+  /* create hash */
+  mcf->us_hash = hash_create(cf->pool, mcf->uss->nelts*2);
+  if (NULL == mcf->us_hash) {
+    logce("creating upstream hash failed");
+    return NGX_ERROR;
+  }
+
+  for (i= 0; i < mcf->uss->nelts; ++i){
+
+    usnode = ngx_array_get(mcf->uss, i);
+
+    logce("to add :%V", &usnode->name);
+
+    if (NGX_OK != hash_padd(cf->pool, mcf->us_hash, &usnode->name, (intptr_t)usnode)) {
+      logce("failed to add hash element %V", &usnode->name);
+      return NGX_ERROR;
+    }
+  }
+
+
+  return NGX_OK;
 }
 
   ngx_int_t
 ngx_http_rv2_init_proc(ngx_cycle_t *cycle)
 {
-  ngx_http_core_main_conf_t     *cmcf;
-  ngx_http_rv2_main_conf_t       *mcf;
+  /* ngx_http_core_main_conf_t *cmcf; */
+  ngx_http_rv2_main_conf_t  *mcf;
+  ngx_http_rv2_us_node_t                  *us;
+  ngx_http_rv2_mcd_node_t                 *mcd;
 
-  ngx_http_rv2_var_t *ctx;
-
-  ngx_http_variable_t **vip;
-
-  ngx_uint_t                     i;
-  ngx_uint_t                     rc;
+  ngx_uint_t                 i;
+  ngx_uint_t                 j;
+  ngx_int_t                  rc;
 
 
-  cmcf = ngx_http_cycle_get_module_main_conf(cycle, ngx_http_core_module);
+  /* cmcf = ngx_http_cycle_get_module_main_conf(cycle, ngx_http_core_module); */
   mcf = ngx_http_cycle_get_module_main_conf(cycle, ngx_http_rv2_module);
 
+  for (i= 0; i < mcf->uss->nelts; ++i){
+    us = (ngx_http_rv2_us_node_t*)ngx_array_get(mcf->uss, i);
 
-  vip = mcf->rvs->elts;
+    for (j= 0; j < us->mcd_array->nelts; ++j){
+      mcd = (ngx_http_rv2_mcd_node_t*)ngx_array_get(us->mcd_array, j);
 
-  for (i= 0; i < mcf->rvs->nelts; ++i){
-    ctx = (ngx_http_rv2_var_t*)vip[i]->data;
-    
-    logy("connect mc for RV[%V]", &vip[i]->name);
-    rc = ngx_http_rv2_connet_mc(cycle, &ctx->mcs, ctx->mc_addrs);
-    if (NGX_OK != rc){
-      return rc;
+      rc = ngx_mcd_connect(cycle, &mcd->addr, &mcd->mc);
+      if (NGX_ERROR == rc) {
+        logye("failed to connect to mc : %V", &mcd->addr);
+        /* return NGX_ERROR; */
+      }
     }
   }
 
   return NGX_OK;
 }
 
-  static ngx_int_t 
-ngx_http_rv2_connet_mc(ngx_cycle_t *cycle, ngx_array_t **mcs, ngx_array_t *addrs /* ngx_str_t */)
-{
-  /**
-   * TODO thread safe?
-   */
-
-  ngx_uint_t     i;
-  ngx_int_t      rc;
-  ngx_str_t     *a;
-
-  u_char  buf[0x100];
-
-  memcache_t **mc;
-
-  /* if (NULL == *mc){ */
-    /* mc_free(*mc); */
-  /* } */
-
-  *mcs = ngx_array_create(cycle->pool, addrs->nelts, sizeof(memcache_t*));
-  if (NULL == *mcs){
-    return NGX_ERROR;
-  }
-
-  /* mc = (*mcs)->elts; */
-
-  
-
-  for (i= 0; i < addrs->nelts; ++i){
-    mc = ngx_array_push(*mcs);
-    *mc = mc_new();
-    if (NULL == *mc){
-      return NGX_ERROR;
-    }
-    a = addrs->elts;
-    a = &a[i];
-
-    memcpy(buf, a->data, a->len);
-    buf[a->len] = 0;
-
-    rc = mc_server_add4(*mc, (char*)buf);
-    if (0 != rc){
-      return NGX_ERROR;
-    }
-
-    if (NULL != cycle){
-      logy("added addr[%s] to mc", buf);
-    }
-
-    /* TODO configurable timeout */
-    mc_timeout(*mc, 5, 0);
-  }
-
-  return NGX_OK;
-}
-
-  static memcache_t *
+  static memcached_st *
 get_mc(ngx_array_t *mcs, u_char *key, ngx_int_t len)
 {
   ngx_uint_t hash = ngx_crc32_long(key, len);
-  memcache_t **mc = mcs->elts;
+  memcached_st **mc = mcs->elts;
   return mc[hash % mcs->nelts];
 }
 
-  static int
-reconnect(ngx_array_t *mcs, u_char *key, ngx_int_t len)
-{
-
-  char buf[256];
-  int l = 0;
-
-  int rc = 0;
-
-  ngx_uint_t hash = ngx_crc32_long(key, len);
-  memcache_t **mc = mcs->elts;
-  
-  mc = &mc[hash % mcs->nelts];
-  struct memcache_server *mcsvr = *(*mc)->servers;
-  
-
-
-
-  l = sprintf(buf, "%s:%s", mcsvr->hostname, mcsvr->port);
-  buf[l] = 0;
-
-  mc_free(*mc);
-
-  *mc = mc_new();
-  rc = mc_server_add4(*mc, (char*)buf);
-
-  DEBUG("reconnect:%s, rc=%d", buf, rc);
-
-  return 0;
-}
-
-
-/* TODO close all mc connection */
-  static void
-ngx_http_rv2_exit(ngx_cycle_t *cycle)
-{
-  /* ngx_http_rv2_main_conf_t *mcf; */
-
-  /* mcf = (ngx_http_rv2_main_conf_t *)ngx_http_cycle_get_module_main_conf(cycle, ngx_http_rv2_module); */
-
-  /* if (NULL != mcf->mc){ */
-    /* mc_free(mcf->mc); */
-  /* } */
-
-  return;
-}
-
-  static ngx_int_t
-ngx_http_rv2_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
-{
-  /**
-   * TODO error handling
-   * TODO cachable variable value?
-   */
-  fSTEP;
-
-  ngx_http_rv2_main_conf_t   *mcf;
-  ngx_http_variable_value_t *mckvv;
-  ngx_http_variable_value_t *mchvv;
-
-  memcache_t *mc;
-
-  ngx_http_rv2_var_t *ctx;
-
-  char                      *buf   = NULL;
-  char                      *mcv   = NULL;
-  ngx_int_t                  mcvl;
-
-
-  mcf = (ngx_http_rv2_main_conf_t*)ngx_http_get_module_main_conf(r, ngx_http_rv2_module);
-
-
-  ctx = (ngx_http_rv2_var_t*)data;
-
-
-  mckvv = ngx_http_get_flushed_variable(r, ctx->mck_index);
-
-  if (mckvv->not_found || !mckvv->valid) {
-    return NGX_ERROR;
-  }
-
-  logr("the hashkey_index:%d", ctx->hashkey_index);
-
-  mchvv = ngx_http_get_flushed_variable(r, ctx->hashkey_index);
-  if (mchvv->not_found || !mchvv->valid) {
-    return NGX_ERROR;
-  }
-
-  ngx_log_debug(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0,
-    "mc key of remote variable:%v", mckvv);
-
-  mc = get_mc(ctx->mcs, mchvv->data, mchvv->len);
-  mcv = mc_aget(mc, (char*)mckvv->data, mckvv->len);
-  if (NULL == mcv){
-      reconnect(ctx->mcs, mckvv->data, mckvv->len);
-    logr("get remote failed");
-    *v = ngx_http_variable_null_value;
-
-    return NGX_OK;
-  }
-
-  logr("got value from mc:[%s]", mcv);
-
-  mcvl = ngx_strlen(mcv);
-
-  buf = ngx_palloc(r->pool, sizeof(char) * (mcvl + 1));
-  if (NULL == buf){
-    return NGX_ERROR;
-  }
-
-  ngx_memcpy(buf, mcv, mcvl);
-  buf[mcvl] = 0;
-  free(mcv);
-
-  v->data = (u_char*)buf;
-  v->len  = mcvl;
-  v->valid = 1;
-
-  ngx_log_debug(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0,
-    "value of remote variable:%v", v);
-
-  return NGX_OK;
-}
-
-  static void
-ngx_http_rv2_set_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data)
-{
-  /**
-   * TODO error handling
-   */
-  fSTEP;
-
-  ngx_http_rv2_main_conf_t   *mcf;
-  ngx_http_variable_value_t *mchvv; /* hash variable */
-  ngx_http_variable_value_t *mckvv;
-  ngx_http_variable_value_t *mcv_vv;
-
-  ngx_http_rv2_var_t        *ctx;
-
-  u_char                    *buf;
-  u_char                     val[32];
-
-  memcache_t                *mc;
-
-  ngx_int_t                  op      = RV_SET;
-  ngx_int_t                  d       = 0;
-  ngx_int_t                  rc      = -1;
-
-
-
-
-  mcf = ngx_http_get_module_main_conf(r, ngx_http_rv2_module);
-  ctx = (ngx_http_rv2_var_t*)data;
-
-
-  mcv_vv = &r->variables[ctx->mcv_index];
-
-
-  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "key index:%d", ctx->mck_index);
-
-  mckvv = ngx_http_get_flushed_variable(r, ctx->mck_index);
-  if (mckvv->not_found || !mckvv->valid) {
-    return;
-  }
-
-  mchvv = ngx_http_get_flushed_variable(r, ctx->hashkey_index);
-  if (mchvv->not_found || !mchvv->valid) {
-    return;
-  }
-
-  ngx_log_debug(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0, "mc key of remote variable:%v", mckvv);
-  ngx_log_debug(NGX_LOG_DEBUG_HTTP,  r->connection->log, 0, "value to set:%v", v);
-
-  op=ctx->op;
-
-  mc = get_mc(ctx->mcs, mchvv->data, mchvv->len);
-
-  logr("got mc:%p", mc);
-
-  if (0 == v->len) {
-    /* delete */
-    logr("to delete:[%v]", mckvv);
-    rc = mc_delete(mc, (char*)mckvv->data, mckvv->len, 0);
-    mcv_vv->data = NULL;
-    mcv_vv->len = 0;
-    mcv_vv->valid = 0;
-    mcv_vv->not_found = 1;
-    return;
-  }
-
-  /* extract value of incr or decr */
-  switch (op) {
-    case RV_INCR:
-    case RV_DECR:
-
-      if (1 == v->len) {
-        d = *v->data - '0';
-      }
-      else {
-        d = ngx_atoi(v->data, v->len);
-      }
-
-      if (0 == d){
-        return;
-      }
-  }
-
-  switch (op) {
-    case RV_INCR:
-      rc = mc_incr(mc, (char*)mckvv->data, mckvv->len, d);
-      break;
-
-    case RV_DECR:
-      rc = mc_decr(mc, (char*)mckvv->data, mckvv->len, d);
-      break;
-  }
-
-  if (RV_SET != op){
-    if (0 != rc) {
-      buf = ngx_palloc(r->pool, 32);
-      if (NULL == buf){
-        mcv_vv->data = NULL;
-        mcv_vv->len = 0;
-        mcv_vv->valid = 0;
-        mcv_vv->not_found = 1;
-        return;
-      }
-
-      mcv_vv->len = sprintf((char*)buf, "%d", rc);
-      mcv_vv->data = buf;
-      mcv_vv->valid = 1;
-      mcv_vv->not_found = 0;
-      buf[mcv_vv->len] = 0;
-
-      return;
-    }
-    else {
-      /* set default value */
-      d *= RV_INCR == op ? 1 : -1;
-      d += ctx->v0;
-      d = d < 0 ? 0 : d;
-      op = RV_SET;
-
-      rc = sprintf((char*)val, "%d", d);
-      val[rc] = 0;
-      v->data = val;
-      v->len = rc;
-      logr("rc = %d", rc);
-    }
-  }
-
-  if  (RV_SET == op) {
-    rc = mc_set(mc, (char*)mckvv->data, mckvv->len, (char*)v->data, v->len, 0, 0);
-    if (0 != rc){
-
-      ngx_log_error(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "set remote var failed:rc=%d", rc);
-
-      reconnect(ctx->mcs, mckvv->data, mckvv->len);
-      mcv_vv->data = NULL;
-      mcv_vv->len = 0;
-      mcv_vv->valid = 0;
-      mcv_vv->not_found = 1;
-      return;
-    }
-    mcv_vv->data = v->data;
-    mcv_vv->len = v->len;
-    mcv_vv->valid = 1;
-    mcv_vv->not_found = 0;
-  }
-
-}
 
   static char *
-ngx_http_rv2_hash_key_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+ngx_http_rv2_dec_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
-  ngx_http_core_main_conf_t  *cmcf;
-  ngx_http_core_loc_conf_t   *clcf;
-  ngx_http_rv2_main_conf_t    *mcf;
-  ngx_str_t                  *argvalues;
-  ngx_str_t                   rvname;
-  ngx_str_t                   hashname;
+  mcf_t                     *mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_rv2_module);
 
-  ngx_http_variable_t        *rv;
-  /* ngx_http_variable_t        *hash; */
-  char* res;
+  ngx_str_t                 *vals;
+  ngx_uint_t                 nval;
 
-  ngx_http_rv2_var_t *ctx;
+  ngx_http_rv2_t                      *rv;
+  ngx_str_t                  rv_name     = ngx_null_string;
 
+  ngx_str_t                  usname      = ngx_null_string;
+  ngx_str_t                  keyname     = ngx_null_string;
+  ngx_str_t                  hash        = ngx_string("crc32");
+  ngx_str_t                  hash_key    = ngx_null_string;
+  ngx_str_t                  default_val = rv2_default_val;
 
-  if (cf->args->nelts < 3){
-    return "arguments number must not be less than 3";
-  }
-
-  mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_rv2_module);
-
-  cmcf  = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
-  clcf  = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
-
-  argvalues = cf->args->elts;
-
-
-  if (NULL != 
-    (res = ngx_http_get_var_name_str(&argvalues[1], &rvname))) {
-    return res;
-  }
-
-  if (NULL != 
-    (res = ngx_http_get_var_name_str(&argvalues[2], &hashname))) {
-    return res;
-  }
-
-  rv = ngx_http_add_variable(cf, &rvname, NGX_HTTP_VAR_CHANGEABLE);
-  if (NULL == rv) {
-    return "cant find remote variable";
-  }
-
-  ctx = (ngx_http_rv2_var_t*)rv->data;
-  if (NULL == ctx) {
-    return "remote variable has no context object";
-  }
-
-  /* logc("hashname:%V", &hashname); */
-  ctx->hashkey_index = ngx_http_get_variable_index(cf, &hashname);
-  if (NGX_ERROR == ctx->hashkey_index) {
-    return "cant find hash key variable";
-  }
-
-  /* logc("key index:%d", ctx->mck_index); */
-  /* logc("hash index:%d", ctx->hashkey_index); */
-
-  return NGX_CONF_OK;
-}
-  static char *
-ngx_http_rv2_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
-{
-  ngx_http_core_main_conf_t  *cmcf;
-  ngx_http_core_loc_conf_t   *clcf;
-  mcf_t                      *mcf;
-
-  ngx_str_t                  *vals;
-  ngx_int_t                   nval;
-
-  ngx_str_t                   rv_name     = ngx_null_string;
-
-  ngx_str_t                   usname      = ngx_null_string;
-  ngx_str_t                   key         = ngx_null_string;
-  ngx_str_t                   hash        = ngx_string("crc32")
-  ngx_str_t                   hash_key    = ngx_null_string;
-  ngx_str_t                   default_val = ngx_string("NULL");
-
-  ngx_str_t                   ops         = ngx_null_string;
-  ngx_str_t                   v0s         = ngx_null_string;
-  ngx_int_t                   v0          = 0;
-  ngx_http_rv2_op_t           op          = RV_SET;
-  ngx_http_variable_t        *v;
-  ngx_int_t                   vi;
-  ngx_int_t                   i;
-
-  rv_t                       *rv;
-
-  ngx_http_variable_t       **ip;
-  ngx_uint_t                  i;
-  char                       *res         = NULL;
+  ngx_uint_t                 i;
+  ngx_http_script_compile_t  sc;
+  char                      *res         = NULL;
+  ngx_int_t                  rc          = 0;
 
 
   nval = cf->args->nelts;
@@ -772,28 +313,29 @@ ngx_http_rv2_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     return "require at least 1 argument";
   }
 
-  mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_rv2_module);
-
-  cmcf  = ngx_http_conf_get_module_main_conf(cf, ngx_http_core_module);
-  clcf  = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
-
   vals = cf->args->elts;
 
 
 
   /* 1 required argument : var name */
-  if (NULL != 
+  if (NULL !=
     (res = ngx_http_get_var_name_str(&vals[1], &rv_name))) {
     return res;
   }
 
   /* duplicate check */
-  for (i= 0; i < mcf->rvs->nelts; ++i){
-    rv = (rv_t*)ngx_array_get(mcf->rvs, i);
-    if (ngx_str_eq(&rv_name, &rv->name)) {
-      return "duplicate rv name declared";
-    }
+  if (ngx_http_rv2_if_exists(cf, &rv_name)) {
+    return "duplicate rv name declared";
   }
+
+  rv = ngx_array_push(mcf->rvs);
+  if (NULL == rv) {
+    return "allocating rv context failed";
+  }
+
+  rv->name = rv_name;
+
+
 
 
   /* default values */
@@ -801,18 +343,19 @@ ngx_http_rv2_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
   str_palloc(&usname, cf->pool, 64);
   str_palloc(&keyname, cf->pool, 64);
+  str_palloc(&hash_key, cf->pool, 64);
 
 
   if (!usname.data || !keyname.data) {
     return "allocating buffers failed";
   }
 
-  usname.len      = snprint(strpr(usname)     , "%.*s_us" , strp(rv->name));
-  keyname.len     = snprint(strpr(keyname)    , "%.*s_key", strp(rv->name));
+  usname.len      = snprintf((char*)strpr(usname)     , "%.*s_us" , strp(rv->name));
+  keyname.len     = snprintf((char*)strpr(keyname)    , "%.*s_key", strp(rv->name));
+  hash_key.len     = snprintf((char*)strpr(hash_key)    , "%.*s_key", strp(rv->name));
 
 
-  /* read command arguments */
-
+  /* read other command arguments */
   for (i = 2; i < nval; ++i) {
     str_switch(&vals[i]) {
       str_case_pre("upstream=") {
@@ -822,8 +365,13 @@ ngx_http_rv2_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
       str_case_pre("key=") {
         keyname = *str_case_remainder();
-        if (!hash_key.len)
+        if (NULL != (
+              res = ngx_http_get_var_name_str(&keyname, &keyname))) {
+          return res;
+        }
+        if (!hash_key.len) { /* take keyname as default value of hash_key */
           hash_key = keyname;
+        }
         break;
       }
 
@@ -834,10 +382,14 @@ ngx_http_rv2_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
       str_case_pre("hash_key=") {
         hash_key = *str_case_remainder();
+        if (NULL != (
+              res = ngx_http_get_var_name_str(&hash_key, &hash_key))) {
+          return res;
+        }
         break;
       }
 
-      str_case_pre("default_val=") {
+      str_case_pre("default=") {
         default_val = *str_case_remainder();
         break;
       }
@@ -848,152 +400,1141 @@ ngx_http_rv2_remote_var_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
   }
 
 
+  logce("rv name:%V, us name:%V, key name:%V, hash_key:%V", &rv->name, &usname, &keyname, &hash_key);
 
 
 
 
+  /* upstream name */
 
+  ngx_memzero(&sc, sizeof(ngx_http_script_compile_t));
 
+  sc.cf = cf;
+  sc.source = &usname;
+  sc.lengths = &rv->us_name_e.lengths;
+  sc.values = &rv->us_name_e.values;
+  sc.complete_lengths = 1;
+  sc.complete_values = 1;
 
-
-  if (NULL != 
-    (res = ngx_http_get_var_name_str(&vals[2], &us_var_name))) {
-    return res;
+  rc = ngx_http_script_compile(&sc);
+  if (NGX_OK != rc) {
+    return "parse upstream name expression failed";
   }
 
 
+  /* key */
 
-  rv = ngx_pcalloc(cf->pool, sizeof(rv_t));
-  if (NULL == rv) {
-    return "allocating rv context failed";
-  }
-
-  rv->name = rv_name;
-
-  rv->us_name_idx = ngx_http_get_variable_index(cf, &us_var_name);
-  if (NGX_ERROR == rv->us_name_idx) {
-    return "variable for upstream name is not set";
+  rv->key_idx = ngx_http_get_variable_index(cf, &keyname);
+  if (NGX_ERROR == rv->key_idx) {
+    return "key name variable is not set";
   }
 
 
-  if (nval == 3) {
-    rv->hash_str = hash_crc32;
+  /* hash method */
+
+  rv->hash_str = hash;
+  if (ngx_str_eq(&hash, &hash_crc32)) {
     rv->hash_type = HASH_CRC32;
     rv->hash_func = ngx_crc32_long;
   }
+  else if (ngx_str_eq(&hash, &hash_crc32_short)) {
+    rv->hash_type = HASH_CRC32_SHORT;
+    rv->hash_func = ngx_crc32_short;
+  }
+  /* else if (ngx_str_eq(&hash, &hash_5381)) { */
+    /* rv->hash_type = HASH_5381; */
+    /* rv->hash_func = ngx_crc32_short; */
+  /* } */
+  else {
+    return "unsupported hash method";
+  }
 
-  if (nval >= 3) { /* hash method */
-    rv->hash_str = vals[3];
 
-    if (ngx_str_eq(&hash_crc32, &rv->hash_str)) {
-      rv->hash_type = HASH_CRC32;
-      rv->hash_func = ngx_crc32_long;
+  /* hash key */
+
+  rv->hash_key_idx = ngx_http_get_variable_index(cf, &hash_key);
+  if (NGX_ERROR == rv->hash_key_idx) {
+    return "hash key variable is not set";
+  }
+
+
+  /* default value */
+
+  ngx_memzero(&sc, sizeof(ngx_http_script_compile_t));
+
+  sc.cf = cf;
+  sc.source = &default_val;
+  sc.lengths = &rv->default_val_e.lengths;
+  sc.values = &rv->default_val_e.values;
+  sc.complete_lengths = 1;
+  sc.complete_values = 1;
+
+  rc = ngx_http_script_compile(&sc);
+  if (NGX_OK != rc) {
+    return "parsing default value expression failed";
+  }
+
+  return NGX_CONF_OK;
+}
+
+/**
+ * get
+ */
+  static char *
+ngx_http_rv2_getter_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+{
+  ngx_http_rewrite_loc_conf_pseudo_t *rlcf;
+
+  ngx_http_variable_t                *rcv = NULL;
+  ngx_http_rv2_op_data_t             *rvod;
+  ngx_str_t                          *vals;
+  ngx_uint_t                          nval;
+
+  ngx_str_t                           val;
+  ngx_str_t                           rvname;
+  ngx_str_t                           rcname   = ngx_null_string;
+
+  ngx_int_t                           valindex;
+
+  ngx_http_rv2_getter_code_t            *code;
+
+  /* ngx_http_script_compile_t  sc; */
+  ngx_http_variable_t                *v;
+  char                               *res;
+
+
+ rv2_map_cmd_t *tmp = cmd_map;
+ logc("%x", tmp);
+
+
+
+  rlcf   = ngx_http_conf_get_module_loc_conf(cf, ngx_http_rewrite_module);
+
+
+  nval = cf->args->nelts;
+  vals = cf->args->elts;
+
+  if (NULL != (
+        res = ngx_http_get_var_name_str(&vals[1], &val))) {
+    return res;
+  }
+
+  if (NULL != (
+        res = ngx_http_get_var_name_str(&vals[2], &rvname))) {
+    return res;
+  }
+
+  if (4 == nval) {
+    if (NULL != (
+          res = ngx_http_get_var_name_str(&vals[3], &rcname))) {
+      return res;
     }
-    else if (ngx_str_eq(&hash_crc32_short, &rv->hash_str)) {
-      rv->hash_type = HASH_CRC32_SHORT;
-      rv->hash_func = ngx_crc32_short;
-    }
-    /* else if (ngx_str_eq(&hash_crc32_short, &rv->hash_str)) { */
-      /* TODO */
-    /* } */
-    else {
-      return "illegal hash method";
-    }
-  }
-
-  
-
-  if (nval >= 4) { /* hash key var */
-
   }
 
 
-  usname = vals[3];
-
-  if (cf->args->nelts > 4 /* including command */) {
-    ops = vals[4];
-  }
-
-  if (cf->args->nelts > 5 /* including command */) {
-    v0s = vals[4];
-    v0 = ngx_atoi(v0s.data, v0s.len);
-    if (NGX_ERROR == v0) v0 = 0;
-    if (0 > v0) v0 = 0;
+  valindex = ngx_http_rv2_add_var(cf, &val, &v);
+  if (NGX_ERROR == valindex) {
+    return NGX_CONF_ERROR;
   }
 
 
-  for (i= 0; i < mcf->rvs->nelts; ++i){
-    ip = mcf->rvs->elts;
-    v = ip[i];
-    if (0 == ngx_strncmp(v->name.data, rv_name.data, rv_name.len)) {
-      return "found duplicated RV name";
+  code = ngx_http_script_start_code(cf->pool, &rlcf->codes, sizeof(ngx_http_rv2_getter_code_t));
+  if (NULL == code) {
+    logce("failed to create 'get' code");
+    return NGX_CONF_ERROR;
+  }
+
+
+  code->code = ngx_http_rv2_getter_code;
+
+  rvod = &code->data;
+
+  rvod->vidx = valindex;
+
+
+  rvod->rv = ngx_http_rv2_find(cf, &rvname);
+  if (NULL == rvod->rv){
+    logce("invalid rv name : %V", &rvname);
+    return NGX_CONF_ERROR;
+  }
+
+  logce("rc name:%V", &rcname);
+
+  if (0 < rcname.len) {
+    rvod->rcidx = ngx_http_rv2_add_var(cf, &rcname, &rcv);
+    if (NGX_ERROR == rvod->rcidx) {
+      logce("failed to add varaible %V", &rcname);
+      return NGX_CONF_ERROR;
     }
   }
-
-
-  if (NULL != ops.data){
-    if (0 == ngx_strncmp(ops.data, rv_op_incr.data, rv_op_incr.len)) { op = RV_INCR; }
-    if (0 == ngx_strncmp(ops.data, rv_op_decr.data, rv_op_decr.len)) { op = RV_DECR; }
+  else {
+    rvod->rcidx = NGX_CONF_UNSET;
   }
 
 
 
-  rv = ngx_pcalloc(cf->pool, sizeof(ngx_http_rv2_var_t));
-  if (NULL == rv){
-    return "create variable context failed";
+  if (NGX_CONF_OK != ngx_http_rv2_code_set_gen(cf, v)) {
+    return NGX_CONF_ERROR;
   }
 
-  rv->mck_index = ngx_http_get_variable_index(cf, &us_var_name);
-  rv->us_var_name = usname;
-  rv->hashkey_index = rv->mck_index;
-  rv->op = op;
-  rv->v0 = v0;
-
-
-  v = ngx_http_add_variable(cf, &rv_name, NGX_HTTP_VAR_CHANGEABLE);
-  vi = ngx_http_get_variable_index(cf, &rv_name);
-
-
-  v->get_handler = ngx_http_rv2_get_handler;
-  v->set_handler = ngx_http_rv2_set_handler;
-  v->data = (uintptr_t)rv;
-
-
-  /* logc("RV[%V] rv:[%p]", &v->name, v->data); */
-
-  rv->mcv_index = vi;
-
-
-  ip = ngx_array_push(mcf->rvs);
-  if (NULL == ip){
-    return "pushing remote variable to main conf failed";
+  if (NGX_CONF_UNSET != rvod->rcidx 
+      && NGX_CONF_OK != ngx_http_rv2_code_set_gen(cf, rcv)) {
+    return NGX_CONF_ERROR;
   }
-  *ip = v;
+
+  return NGX_CONF_OK;
+}
+
+/**
+ * set
+ * incr
+ * decr
+ * add
+ * delete
+ * replace
+ */
+  static char *
+ngx_http_rv2_setter_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+{
+  ngx_http_rewrite_loc_conf_pseudo_t *rlcf;
+
+  ngx_http_rv2_op_data_t             *rvod;
+  ngx_str_t                          *vals;
+  ngx_uint_t                          nval;
+  ngx_uint_t                          ival;
+
+  ngx_str_t                           rvname;
+  rv_op_t                             optype;
+
+  ngx_http_rv2_setter_code_t         *code;
+ngx_http_script_compile_t sc;
+  /* ngx_http_variable_t                *newval; */
+  char                               *res;
+
+
+  /* debug */
+  /* rv2_map_cmd_t *tmp = cmd_map; */
+  /* logc("%x", tmp); */
+
+
+
+  rlcf   = ngx_http_conf_get_module_loc_conf(cf, ngx_http_rewrite_module);
+
+
+
+  optype = rv2_get_cmd_type(cf, &cmd->name);
+  if (RV_UNKNOWN == optype) {
+    return "illegal command name";
+  }
+
+
+
+  code = ngx_http_script_start_code(cf->pool, &rlcf->codes, sizeof(ngx_http_rv2_setter_code_t));
+  if (NULL == code) {
+    logce("failed to create 'setter' code");
+    return NGX_CONF_ERROR;
+  }
+
+  code->code = ngx_http_rv2_setter_code;
+
+  rvod = &code->data;
+
+  rvod->optype = optype;
+  rvod->vidx = NGX_CONF_UNSET;
+  rvod->rcidx = NGX_CONF_UNSET;
+
+
+  vals = cf->args->elts;
+  nval = cf->args->nelts;
+  ival = 1; /* the first argument */
+
+
+
+  /* need returned value */
+  if (RV_INCR == optype || RV_DECR == optype) {
+
+    ngx_str_t            newvalname;
+    ngx_http_variable_t *newval;
+
+    if (NULL != (
+          res = ngx_http_get_var_name_str(&vals[ival], &newvalname))) {
+      logce("invalid name:%V", &vals[ival]);
+      return res;
+    }
+    ++ival;
+
+    rvod->vidx = ngx_http_rv2_add_var(cf, &newvalname, &newval);
+    if (NGX_ERROR == rvod->vidx) {
+      return NGX_CONF_ERROR;
+    }
+
+
+    if (NGX_CONF_OK != ngx_http_rv2_code_set_gen(cf, newval)) {
+      return NGX_CONF_ERROR;
+    }
+  }
+
+
+
+  /* rv */
+  if (NULL != (
+        res = ngx_http_get_var_name_str(&vals[ival], &rvname))) {
+    logce("invalid name:%V", &vals[ival]);
+    return res;
+  }
+  ++ival;
+
+  rvod->rv = ngx_http_rv2_find(cf, &rvname);
+  if (NULL == rvod->rv){
+    logce("invalid rv name : %V", &rvname);
+    return NGX_CONF_ERROR;
+  }
+
+
+  /* no value needed to set */
+  if (RV_DELETE != optype) {
+
+    ngx_str_t v2set = vals[ival];
+    ++ival;
+
+
+    ngx_memzero(&sc, sizeof(ngx_http_script_compile_t));
+
+    sc.cf = cf;
+    sc.source = &v2set;
+    sc.lengths = &rvod->v2set_e.lengths;
+    sc.values = &rvod->v2set_e.values;
+    sc.complete_lengths = 1;
+    sc.complete_values = 1;
+
+    if (NGX_OK != ngx_http_script_compile(&sc)) {
+      return "parse value_to_set expression failed";
+    }
+
+  }
+
+
+  /* rc required? */
+  if (ival < nval) {
+
+    ngx_str_t            rcname;
+    ngx_http_variable_t *rcv    = NULL;
+
+    if (NULL != (
+          res = ngx_http_get_var_name_str(&vals[ival], &rcname))) {
+      logce("invalid name:%V", &vals[ival]);
+      return res;
+    }
+    ++ival;
+
+    logce("rc name:%V", &rcname);
+
+
+    rvod->rcidx = ngx_http_rv2_add_var(cf, &rcname, &rcv);
+    if (NGX_ERROR == rvod->rcidx) {
+      logce("failed to add varaible %V", &rcname);
+      return NGX_CONF_ERROR;
+    }
+    
+
+    if (NGX_CONF_OK != ngx_http_rv2_code_set_gen(cf, rcv)) {
+      return NGX_CONF_ERROR;
+    }
+  }
 
 
   return NGX_CONF_OK;
 }
 
-  static void *
-ngx_http_create_main_conf (ngx_conf_t *cf)
+  static rv_op_t
+rv2_get_cmd_type(ngx_conf_t *cf, ngx_str_t *cmd)
 {
-  fSTEP;
+  ngx_str_t      c;
+  rv2_map_cmd_t *e;
+
+
+  c = *cmd;
+  if (NULL == str_shift(&c, sizeof("rv_") - 1)) {
+    logce("bad command format:%V", cmd);
+    return RV_UNKNOWN;
+  }
+
+  for (e = cmd_map; RV_NULL != e->op; ++e) {
+    if (ngx_str_eq(&c, &e->cmd)) {
+      return e->op;
+    }
+  }
+
+  logce("cant find corresponding command type:%V", cmd);
+  return RV_UNKNOWN;
+}
+
+  static ngx_int_t
+ngx_http_rv2_add_var(ngx_conf_t *cf, ngx_str_t *name, ngx_http_variable_t **var)
+{
+  ngx_http_variable_t *v;
+  ngx_int_t            valindex;
+
+  v = ngx_http_add_variable(cf, name, NGX_HTTP_VAR_CHANGEABLE);
+  if (NULL == v) {
+    logce("invalid variable name :%V", name);
+    *var = NULL;
+    return NGX_ERROR;
+  }
+
+  valindex = ngx_http_get_variable_index(cf, name);
+
+  if (NULL == v->get_handler) { /* variable is not declared */
+    /* copied from rewrite module */
+    if (v->get_handler == NULL
+        && ngx_strncasecmp(name->data, (u_char *) "http_", 5) != 0
+        && ngx_strncasecmp(name->data, (u_char *) "sent_http_", 10) != 0
+        && ngx_strncasecmp(name->data, (u_char *) "upstream_http_", 14) != 0)
+    {
+        v->get_handler = ngx_http_rv2_unreachable_get_handler;
+        v->data = valindex;
+    }
+  }
+
+  *var = v;
+
+  return valindex;
+}
+
+  static char *
+ngx_http_rv2_code_set_gen(ngx_conf_t *cf, ngx_http_variable_t *v)
+{
+  ngx_http_rewrite_loc_conf_pseudo_t *rlcf;
+  ngx_http_script_var_handler_code_t *vhcode;
+  ngx_http_script_var_code_t         *vcode;
+  ngx_int_t                           valindex;
+
+
+
+
+  rlcf = ngx_http_conf_get_module_loc_conf(cf, ngx_http_rewrite_module);
+  valindex = ngx_http_get_variable_index(cf, &v->name);
+
+  if (v->set_handler) {
+    vhcode = ngx_http_script_start_code(cf->pool, &rlcf->codes,
+        sizeof(ngx_http_script_var_handler_code_t));
+    if (vhcode == NULL) {
+      return NGX_CONF_ERROR;
+    }
+
+    vhcode->code = ngx_http_script_var_set_handler_code;
+    vhcode->handler = v->set_handler;
+    vhcode->data = v->data;
+
+    return NGX_CONF_OK;
+  }
+
+  vcode = ngx_http_script_start_code(cf->pool, &rlcf->codes,
+      sizeof(ngx_http_script_var_code_t));
+  if (vcode == NULL) {
+    return NGX_CONF_ERROR;
+  }
+
+  vcode->code = ngx_http_script_set_var_code;
+  vcode->index = (uintptr_t)valindex;
+
+  return NGX_CONF_OK;
+}
+
+  static void *
+ngx_http_rv2_create_main_conf (ngx_conf_t *cf)
+{
+  fSTEPc();
 
   ngx_http_rv2_main_conf_t * mcf = ngx_pcalloc(cf->pool, sizeof(ngx_http_rv2_main_conf_t));
   memset(mcf, 0, sizeof(ngx_http_rv2_main_conf_t));
 
-  mcf->rvs = ngx_array_create(cf->pool, 20, sizeof(ngx_http_variable_t*));
+  mcf->rvs = ngx_array_create(cf->pool, 20, sizeof(ngx_http_rv2_t));
   if (NULL == mcf->rvs){
     return NULL;
   }
 
-  /* logc("create main config done"); */
   return mcf;
 }
 
   static char*
-ngx_http_init_main_conf (ngx_conf_t *cf, void *conf)
+ngx_http_rv2_init_main_conf (ngx_conf_t *cf, void *conf)
 {
   return NULL;
+}
+
+
+  ngx_int_t
+ngx_http_rv2_if_exists(ngx_conf_t *cf, ngx_str_t *name)
+{
+  mcf_t          *mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_rv2_module);
+  ngx_http_rv2_t *rv;
+  ngx_uint_t      i;
+
+
+  for (i= 0; i < mcf->rvs->nelts; ++i){
+    rv = ngx_array_get(mcf->rvs, i);
+    if (ngx_str_eq(name, &rv->name)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+  static ngx_int_t
+ngx_http_rv2_get_index(ngx_conf_t *cf, ngx_str_t *name)
+{
+  mcf_t              *mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_rv2_module);
+  ngx_http_rv2_t *rv;
+  ngx_uint_t          i;
+
+
+  for (i= 0; i < mcf->rvs->nelts; ++i){
+    rv = (ngx_http_rv2_t*)ngx_array_get(mcf->rvs, i);
+    if (ngx_str_eq(name, &rv->name)) {
+      return i;
+    }
+  }
+
+  return NGX_ERROR;
+
+}
+
+  ngx_http_rv2_t*
+ngx_http_rv2_find(ngx_conf_t *cf, ngx_str_t *name)
+{
+  mcf_t              *mcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_rv2_module);
+  ngx_http_rv2_t *rv;
+  ngx_uint_t          i;
+
+
+  for (i= 0; i < mcf->rvs->nelts; ++i){
+    rv = (ngx_http_rv2_t*)ngx_array_get(mcf->rvs, i);
+    if (ngx_str_eq(name, &rv->name)) {
+      return rv;
+    }
+  }
+
+  return NULL;
+
+}
+
+  static void
+ngx_http_rv2_getter_code(ngx_http_script_engine_t *e)
+{
+  ngx_http_rv2_main_conf_t  *mcf;
+  ngx_http_request_t        *r      = e->request;
+
+  ngx_http_rv2_us_node_t    *us;
+  ngx_http_rv2_mcd_node_t   *rmcd;
+  memcached_st              *mcd;
+
+
+  ngx_http_rv2_getter_code_t   *code;
+
+  ngx_http_rv2_op_data_t    *rvop;
+  ngx_http_rv2_t            *rv;
+
+  ngx_http_variable_value_t *kvv;
+
+  char                      *val    = NULL;
+  ngx_uint_t                 vlen;
+  ngx_uint_t                 flag;
+  memcached_return           rc;
+
+  ngx_str_t                 *rcs    = &rv2_err_error;
+
+
+  mcf = ngx_http_get_module_main_conf(r, ngx_http_rv2_module);
+
+  code = (ngx_http_rv2_getter_code_t*)e->ip;
+  e->ip += sizeof(ngx_http_rv2_getter_code_t);
+
+  rvop = &code->data;
+  rv = rvop->rv;
+
+
+
+  us = rv2_get_us_node(r, rv, &rcs);
+  if (NULL == us) {
+    goto error_return;
+  }
+
+  logr("got upstream : %V", &us->name);
+
+
+
+  rmcd = rv2_get_mcd_node(r, rv, us, &rcs);
+  if (NULL == rmcd) {
+    goto error_return;
+  }
+
+  logr("memcache backend:%V", &rmcd->addr);
+
+
+  mcd = rmcd->mc;
+
+
+  kvv = ngx_http_get_indexed_variable(r, rv->key_idx);
+  if (!variable_isok(kvv)) {
+    rcs = &rv2_err_key;
+    logre("key variable is not valid");
+
+    goto error_return;
+  }
+
+  logr("rv2 key:%v", kvv);
+
+
+
+
+  val = memcached_get(mcd, (char*)kvv->data, kvv->len, &vlen, &flag, &rc);
+
+  logr("get from memcache : rc=%d", rc);
+
+  if (NULL != val) {
+    logr("get from memcache : value:%s", val);
+  }
+
+
+  if (MEMCACHED_SUCCESS == rc) {
+
+    ngx_str_pbuf(vstr, r->pool, vlen);
+
+    if (NULL == vstr.data){
+      rcs = &rv2_err_internal;
+      logre("allocating for value failed, size:%d", vlen);
+
+      goto error_return;
+    }
+
+    ngx_memcpy(vstr.data, val, vlen);
+
+    if (NULL != val) free(val);
+
+    if (NGX_CONF_UNSET != rvop->rcidx) {
+      stack_push(e->sp, &rv2_err_success);
+    }
+
+
+    stack_push(e->sp, &vstr);
+
+    /* success return */
+    return;
+  }
+  else if (MEMCACHED_NOTFOUND == rc) {
+    rcs = &rv2_err_notfound;
+    logr("value of the key[%v] is not found", kvv);
+
+    goto error_return;
+  }
+  else if (MEMCACHED_ERRNO == rc && ECONNREFUSED == errno) {
+    rcs = &rv2_err_connection;
+    logr("connnection refused, errno:[%d]%s, rc:[%d]%s", errno, strerror(errno), rc, memcached_strerror(mcd, rc));
+
+    goto error_return;
+  }
+  else { /* unknow error */
+    rcs = &rv2_err_error;
+    logr("unkown error, errno:[%d]%s, rc:[%d]%s", errno, strerror(errno), rc, memcached_strerror(mcd, rc));
+
+    goto error_return;
+  }
+
+
+  return;
+
+
+
+
+error_return:
+  logr("error return, rcs:%V", rcs);
+
+  if (NULL != val) free(val);
+
+  if (NGX_CONF_UNSET != rvop->rcidx) {
+    logr("set rcs:%V", rcs);
+    stack_push(e->sp, rcs);
+  }
+
+
+  if  (&rv2_err_notfound == rcs) {
+    ngx_str_t def;
+
+    ngx_http_rv2_eval_default_value(r, rv, &def);
+    stack_push(e->sp, &def);
+
+    logr("set default value:%V", &def);
+  }
+  else {
+    logr("set NULL value");
+    e->sp->data = (u_char*)"";
+    e->sp->len = 0;
+    ++e->sp;
+  }
+
+  return;
+}
+
+  static void
+ngx_http_rv2_setter_code(ngx_http_script_engine_t *e)
+{
+  ngx_http_rv2_main_conf_t   *mcf;
+  ngx_http_request_t         *r      = e->request;
+
+  memcached_st               *mcd;
+
+
+  ngx_http_rv2_getter_code_t *code;
+
+  ngx_http_rv2_op_data_t     *rvop;
+  ngx_http_rv2_t             *rv;
+
+  ngx_http_variable_value_t  *kvv;
+  ngx_str_t                   v2set;
+  ngx_int_t                   d;
+  uint64_t                   ival = 0;
+
+  /* char                       *val    = NULL; */
+  /* ngx_uint_t                  vlen; */
+  /* ngx_uint_t                  flag; */
+  memcached_return            rc;
+
+  ngx_str_t                  *rcs    = &rv2_err_success;
+
+
+  mcf = ngx_http_get_module_main_conf(r, ngx_http_rv2_module);
+
+  /* get code data for execution */
+  code = (ngx_http_rv2_getter_code_t*)e->ip;
+  e->ip += sizeof(ngx_http_rv2_getter_code_t);
+
+  rvop = &code->data;
+  rv = rvop->rv;
+
+  mcd = rv2_get_mcd(r, rv, &rcs);
+  if (NULL == mcd) {
+    goto error_return;
+  }
+
+
+
+  kvv = ngx_http_get_indexed_variable(r, rv->key_idx);
+  if (!variable_isok(kvv)) {
+    rcs = &rv2_err_key;
+    logre("key variable is not valid");
+
+    goto error_return;
+  }
+
+  logr("rv2 key:%v", kvv);
+
+
+
+  /* evaluate the string to set/incr/decr/add */
+  if (RV_DELETE != rvop->optype) {
+    if (NULL == ngx_http_script_run(r, &v2set, rvop->v2set_e.lengths->elts, 0,
+          rvop->v2set_e.values->elts)) {
+
+      rcs = &rv2_err_internal;
+      logre("evaluating value to set failed");
+
+      goto error_return;
+    }
+  }
+
+  if (RV_INCR == rvop->optype || RV_DECR == rvop->optype) {
+
+    d = ngx_atoi(v2set.data, v2set.len);
+    if (NGX_ERROR == d) {
+      rcs = &rv2_err_invalid_val;
+
+      logre("value to incr/decr is not a valid number");
+      goto error_return;
+    }
+  }
+
+
+  switch (rvop->optype) {
+    case RV_SET :
+      rc = memcached_set(mcd, (char*)kvv->data, kvv->len, (char*)v2set.data, v2set.len, 0 /* exp */, 0 /* flag */);
+      break;
+    case RV_INCR :
+      rc = memcached_increment(mcd, (char*)kvv->data, kvv->len, d, &ival);
+      break;
+    case RV_DECR :
+      rc = memcached_decrement(mcd, (char*)kvv->data, kvv->len, d, &ival);
+      break;
+    case RV_ADD :
+      rc = memcached_add(mcd, (char*)kvv->data, kvv->len, (char*)v2set.data, v2set.len, 0 /* exp */, 0 /* flag */);
+      break;
+    case RV_DELETE :
+      rc = memcached_delete(mcd, (char*)kvv->data, kvv->len, 0 /* exp */);
+      break;
+    default:
+      rcs = &rv2_err_internal;
+      logre("invalid optype[%d] for setter code", rvop->optype);
+      goto error_return;
+  }
+
+
+  if (MEMCACHED_ERRNO == rc && ECONNREFUSED == errno) {
+    rcs = &rv2_err_connection;
+    logr("connnection refused, errno:[%d]%s, rc:[%d]%s", errno, strerror(errno), rc, memcached_strerror(mcd, rc));
+
+    goto error_return;
+  }
+
+
+  if (RV_INCR == rvop->optype || RV_DECR == rvop->optype) {
+    if (MEMCACHED_SUCCESS == rc) {
+
+      if (NGX_OK != rv2_push_i(e, rvop, ival, &rcs)) {
+        goto error_return;
+      }
+
+      return; /* success return */
+    }
+    else if (MEMCACHED_NOTFOUND == rc){ /* key does not exist, try to add a default value */
+      if (NGX_OK != rv2_add_default_value(e, rvop, mcd, kvv, d, &rcs)) {
+        goto error_return;
+      }
+
+      return; /* success return */
+    }
+    else { /* unkown error */
+      rcs = &rv2_err_error;
+      logr("unkown error, errno:[%d]%s, rc:[%d]%s", errno, strerror(errno), rc, memcached_strerror(mcd, rc));
+
+      goto error_return;
+    }
+  }
+
+
+
+  if (MEMCACHED_SUCCESS == rc) {
+
+    if (NGX_CONF_UNSET != rvop->rcidx) {
+      logr("set rcs:%V", rcs);
+      stack_push(e->sp, rcs);
+    }
+
+    return; /* success return */
+
+  }
+  else if (MEMCACHED_NOTSTORED == rc) {
+
+    rcs = &rv2_err_notstored;
+    logr("value of the key[%v] is not stored", kvv);
+
+    goto error_return;
+
+  }
+  else { /* unknow error */
+
+    rcs = &rv2_err_error;
+    logr("unkown error, errno:[%d]%s, rc:[%d]%s", errno, strerror(errno), rc, memcached_strerror(mcd, rc));
+
+    goto error_return;
+
+  }
+
+  return;
+
+
+
+
+error_return:
+  logr("error return, rcs:%V", rcs);
+
+  if (NGX_CONF_UNSET != rvop->rcidx) {
+    logr("set rcs:%V", rcs);
+    stack_push(e->sp, rcs);
+  }
+
+  if (NGX_CONF_UNSET != rvop->vidx) {
+    if  (&rv2_err_notstored == rcs) {
+      ngx_str_t def;
+
+      ngx_http_rv2_eval_default_value(r, rv, &def);
+      stack_push(e->sp, &def);
+
+      logr("set default value:%V", &def);
+    }
+    else {
+      logr("set NULL value");
+      e->sp->data = (u_char*)"";
+      e->sp->len = 0;
+      ++e->sp;
+    }
+
+  }
+
+  return;
+}
+
+
+  static ngx_int_t
+rv2_add_default_value(ngx_http_script_engine_t *e, ngx_http_rv2_op_data_t *rvop, 
+    memcached_st *mcd, ngx_http_variable_value_t *kvv, ngx_int_t d, ngx_str_t **rcs)
+{
+  ngx_http_request_t *r   = e->request;
+  ngx_str_t           vdefault;
+  ngx_int_t           iv;
+
+  ngx_int_t           rc;
+  memcached_return    mrc;
+
+
+
+  rc = ngx_http_rv2_eval_default_value(r, rvop->rv, &vdefault);
+  if (NGX_OK != rc) {
+    *rcs = &rv2_err_internal;
+    return rc;
+  }
+
+  iv = ngx_atoi(vdefault.data, vdefault.len);
+  if (NGX_ERROR == iv) 
+    iv = 0;
+
+  if (RV_INCR == rvop->optype) {
+    iv += d;
+  }
+  else {
+    iv -= d;
+  }
+
+
+  /* maybe used by stack, then pool allocation is needed */
+  ngx_str_pbuf(vadd, r->pool, RV2_INT_VAL_LEN);
+  if (NULL == vadd.data) {
+    *rcs = &rv2_err_internal;
+    logre("failed to alloc");
+    return NGX_ERROR;
+  }
+
+  vadd.len = snprintf((char*)vadd.data, vadd.len, "%d", iv);
+
+
+  mrc = memcached_add(mcd, (char*)kvv->data, kvv->len, (char*)vadd.data, vadd.len, 0 /* exp */, 0 /* flag */);
+  if (MEMCACHED_SUCCESS == mrc) {
+
+    *rcs = &rv2_err_success;
+    logr("successfully add a default value for incr/decr key=%v, value=%V", kvv, &vadd);
+    return rv2_push_str(e, rvop, &vadd, rcs);
+
+  }
+  else if (MEMCACHED_NOTSTORED == mrc) {
+
+    /* TODO specific error */
+    *rcs = &rv2_err_notstored;
+    logre("failed to add for incr/decr");
+    return rv2_push_str(e, rvop, &vdefault, rcs);
+    
+  }
+  else { /* unknown error */
+
+    *rcs = &rv2_err_internal;
+    logre("unkown error:memcached rc=[%d]%s", mrc, memcached_strerror(mcd, mrc));
+    return rv2_push_str(e, rvop, &vdefault, rcs);
+
+  }
+
+
+  return NGX_OK; /* always ok */
+}
+
+
+  static ngx_int_t
+rv2_push_charstar(ngx_http_script_engine_t *e, ngx_http_rv2_op_data_t *rvop, 
+    u_char *val, ngx_int_t vlen, ngx_str_t **rcs)
+{
+  ngx_http_request_t *r = e->request;
+
+  ngx_str_pbuf(vstr, r->pool, vlen);
+
+  if (NULL == vstr.data){
+    *rcs = &rv2_err_internal;
+    logre("allocating for value failed, size:%d", vlen);
+    return NGX_ERROR;
+  }
+
+  ngx_memcpy(vstr.data, val, vlen);
+
+
+  return rv2_push_str(e, rvop, &vstr, rcs);
+}
+
+  static ngx_int_t
+rv2_push_i(ngx_http_script_engine_t *e, ngx_http_rv2_op_data_t *rvop, ngx_int_t ival, ngx_str_t **rcs)
+{
+  ngx_http_request_t *r = e->request;
+  ngx_str_pbuf(vstr, r->pool, RV2_INT_VAL_LEN);
+
+  if (NULL == vstr.data){
+    *rcs = &rv2_err_internal;
+    logre("allocating for value failed, size:%d", RV2_INT_VAL_LEN);
+
+    return NGX_ERROR;
+  }
+
+  vstr.len = snprintf((char*)vstr.data, vstr.len, "%d", ival);
+
+  return rv2_push_str(e, rvop, &vstr, rcs);
+}
+
+  static ngx_int_t
+rv2_push_str(ngx_http_script_engine_t *e, ngx_http_rv2_op_data_t *rvop, ngx_str_t *v, ngx_str_t **rcs)
+{
+
+  if (NGX_CONF_UNSET != rvop->rcidx) {
+    stack_push(e->sp, *rcs);
+  }
+
+  stack_push(e->sp, v);
+
+  return NGX_OK;
+}
+
+
+  static memcached_st *
+rv2_get_mcd(ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t **rcs)
+{
+  ngx_http_rv2_us_node_t     *us;
+  ngx_http_rv2_mcd_node_t    *rmcd;
+
+  us = rv2_get_us_node(r, rv, rcs);
+  if (NULL == us) {
+    return NULL;
+  }
+
+  logr("got upstream : %V", &us->name);
+
+
+
+  rmcd = rv2_get_mcd_node(r, rv, us, rcs);
+  if (NULL == rmcd) {
+    return NULL;
+  }
+
+  logr("memcache backend:%V", &rmcd->addr);
+
+
+  return rmcd->mc;
+}
+
+  static ngx_http_rv2_us_node_t *
+rv2_get_us_node(ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t **rcs)
+{
+  ngx_http_rv2_main_conf_t *mcf;
+  ngx_str_t                 usname;
+  ngx_http_rv2_us_node_t   *us;
+
+
+
+  mcf = ngx_http_get_module_main_conf(r, ngx_http_rv2_module);
+
+  if (NGX_OK != ngx_http_rv2_eval_usname(r, rv, &usname)) {
+    *rcs = &rv2_err_invalid_us;
+    logre("evaluating upstream name failed");
+
+    return NULL;
+  }
+
+  logr("upstream name of rv2:%V", &usname);
+
+
+
+  us = (ngx_http_rv2_us_node_t*)hash_find(mcf->us_hash, &usname);
+  if (HASH_ISUNSET(us)) {
+    *rcs = &rv2_err_nosuch_us;
+    logre("can not find upstream with name :%V", &usname);
+
+    return NULL;
+  }
+
+  logr("got upstream : %V", &us->name);
+
+  return us;
+}
+
+  static ngx_http_rv2_mcd_node_t *
+rv2_get_mcd_node(ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_http_rv2_us_node_t *us, ngx_str_t **rcs)
+{
+  uint32_t                   hash;
+  ngx_http_variable_value_t *hvv;
+  ngx_http_rv2_mcd_node_t   *rmcd;
+
+
+
+  /* get from backend */
+  hvv = ngx_http_get_indexed_variable(r, rv->hash_key_idx);
+  if (!variable_isok(hvv)) {
+    *rcs = &rv2_err_hashkey;
+    logre("hash key is not valid");
+
+    return NULL;
+  }
+
+  logr("rv2 hash key:%v", hvv);
+
+
+
+
+  hash = rv->hash_func(hvv->data, hvv->len);
+
+  rmcd = ngx_array_get(us->mcd_array, hash % us->mcd_array->nelts);
+
+  return rmcd;
+}
+
+/**
+ * for a variable set by rv2
+ */
+  static ngx_int_t
+ngx_http_rv2_unreachable_get_handler(ngx_http_request_t *r, ngx_http_variable_value_t *v,
+    uintptr_t data)
+{
+    ngx_http_variable_t          *var;
+    ngx_http_core_main_conf_t    *cmcf;
+
+    cmcf = ngx_http_get_module_main_conf(r, ngx_http_core_module);
+
+    var = cmcf->variables.elts;
+
+    ngx_log_error(NGX_LOG_WARN, r->connection->log, 0,
+                  "using uninitialized \"%V\" variable", &var[data].name);
+
+    *v = ngx_http_variable_null_value;
+
+    return NGX_OK;
+}
+
+  static ngx_int_t
+ngx_http_rv2_eval_usname(ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t *v)
+{
+  if (NULL == ngx_http_script_run(r, v, rv->us_name_e.lengths->elts, 0,
+        rv->us_name_e.values->elts)) {
+    return NGX_ERROR;
+  }
+
+  logr("evaluated us name:%V", v);
+  return NGX_OK;
+}
+
+
+  static ngx_int_t
+ngx_http_rv2_eval_default_value(ngx_http_request_t *r, ngx_http_rv2_t *rv, ngx_str_t *v)
+{
+  if (NULL == ngx_http_script_run(r, v, rv->default_val_e.lengths->elts, 0,
+        rv->default_val_e.values->elts)) {
+    logre("evaluate default value failed");
+    return NGX_ERROR;
+  }
+
+  logr("evaluated default value:%V", v);
+  return NGX_OK;
+
 }
 
