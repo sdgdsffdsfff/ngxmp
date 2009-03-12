@@ -1,3 +1,4 @@
 file /data1/ngmp.nginx/sbin/ngmp.nginx
 set follow-fork-mode child
+break ngx_event_process_init
 run

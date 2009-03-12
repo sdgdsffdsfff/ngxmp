@@ -1093,7 +1093,7 @@ ngx_http_rv2_setter_code(ngx_http_script_engine_t *e)
 
   ngx_http_variable_value_t  *kvv;
   ngx_str_t                   v2set;
-  ngx_int_t                   d;
+  ngx_int_t                   d = 0;
   uint64_t                   ival = 0;
 
   /* char                       *val    = NULL; */

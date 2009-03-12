@@ -6,4 +6,5 @@ break _ngx_http_script_complex_value_code
 break _ngx_http_script_run
 
 rem  break ngx_http_rewrite_module.c:178
-break ngx_http_rv2_code_set_gen
+break _ngx_http_rv2_code_set_gen
+break ngx_event_process_init

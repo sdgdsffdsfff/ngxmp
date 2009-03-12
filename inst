@@ -56,6 +56,7 @@ cd $NGINX_SRC
 # --with-ld-opt=-lstdc++ \
 # --with-ld-opt=-lmemcache \
 # --without-http_proxy_module	    \
+# --without-http_autoindex_module        \
 # --with-cc-opt=-g 			 \
 ./configure                                    \
         $Conf_Mod                              \
@@ -64,7 +65,6 @@ cd $NGINX_SRC
         --without-http_memcached_module        \
         --without-http_access_module           \
         --without-http_auth_basic_module       \
-        --without-http_autoindex_module        \
         --without-http_browser_module          \
         --without-http_charset_module          \
         --without-http_empty_gif_module        \
