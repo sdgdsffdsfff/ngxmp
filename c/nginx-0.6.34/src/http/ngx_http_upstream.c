@@ -1135,6 +1135,12 @@ ngx_http_upstream_process_header(ngx_event_t *rev)
 
     rc = u->process_header(r);
 
+    if (NGX_DONE == rc) {
+      return;
+    }
+
+
+
     if (rc == NGX_AGAIN) {
 #if 0
         ngx_add_timer(rev, u->read_timeout);

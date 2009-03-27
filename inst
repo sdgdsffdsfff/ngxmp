@@ -17,6 +17,7 @@ MODULE_list=../ngx_http_list_module
 Conf_Mod="                                       \
   --add-module=${MODULE_hash}                    \
   --add-module=${MODULE_empty}                   \
+  --add-module=../ngx_http_httpcheck_module      \
   --add-module=../ngx_http_memcached_more_module \
   --add-module=../ngx_http_rv2_module            \
   --add-module=../ngx_http_vwrite_module         \
