@@ -122,6 +122,11 @@ ngx_http_rv2_commands[] = {
     ngx_http_rv2_setter_command,
     NGX_HTTP_LOC_CONF_OFFSET, 0, NULL },
 
+  { ngx_string("rv_set"),
+    NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_1MORE,
+    ngx_http_rv2_setter_command,
+    NGX_HTTP_LOC_CONF_OFFSET, 0, NULL },
+
   { ngx_string("rv_add"),
     NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_1MORE,
     ngx_http_rv2_setter_command,
@@ -354,6 +359,7 @@ ngx_http_rv2_dec_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
   keyname.len     = snprintf((char*)strpr(keyname)    , "%.*s_key", strp(rv->name));
   hash_key.len     = snprintf((char*)strpr(hash_key)    , "%.*s_key", strp(rv->name));
 
+  int hash_set = 0;
 
   /* read other command arguments */
   for (i = 2; i < nval; ++i) {
@@ -369,9 +375,7 @@ ngx_http_rv2_dec_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
               res = ngx_http_get_var_name_str(&keyname, &keyname))) {
           return res;
         }
-        if (!hash_key.len) { /* take keyname as default value of hash_key */
-          hash_key = keyname;
-        }
+
         break;
       }
 
@@ -386,6 +390,8 @@ ngx_http_rv2_dec_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
               res = ngx_http_get_var_name_str(&hash_key, &hash_key))) {
           return res;
         }
+
+        hash_set  = 1;
         break;
       }
 
@@ -399,6 +405,9 @@ ngx_http_rv2_dec_command(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
   }
 
+  if (!hash_set) { /* take keyname as default value of hash_key */
+    hash_key = keyname;
+  }
 
   logce("rv name:%V, us name:%V, key name:%V, hash_key:%V", &rv->name, &usname, &keyname, &hash_key);
 

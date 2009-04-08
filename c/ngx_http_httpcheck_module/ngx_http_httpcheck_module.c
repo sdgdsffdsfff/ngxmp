@@ -1,4 +1,5 @@
-#define    lg(fmt...)  do {fprintf(stderr,""fmt); fprintf(stderr,"\n");} while(0)
+/* #define    lg(fmt...)  do {fprintf(stderr,""fmt); fprintf(stderr,"\n");} while(0) */
+#define    lg(fmt...)
 /*
  * ngx_http_httpcheck_module.c
  *
