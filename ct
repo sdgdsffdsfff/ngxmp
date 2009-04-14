@@ -77,7 +77,7 @@ Strace()
     WPID=`pgrep -P $MPID | head -n1`
     echo $WPID
     # strace -v -e trace=writev -e write=6 -p $WPID
-    strace -v -p $WPID
+    strace -v -s2048 -p $WPID
     echo "-----------------------------------------------------"
   done
 

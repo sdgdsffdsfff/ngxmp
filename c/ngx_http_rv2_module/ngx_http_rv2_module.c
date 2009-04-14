@@ -201,6 +201,9 @@ ngx_http_rv2_post_conf(ngx_conf_t *cf)
 
   for (i= 0; i < usmcf->upstreams.nelts; ++i){
     usscf = *(ngx_http_upstream_srv_conf_t**)(ngx_array_get(&usmcf->upstreams, i));
+    if (NULL == usscf->servers){
+      continue;
+    }
     usnode = ngx_array_push(mcf->uss);
 
     usnode->name = usscf->host;
